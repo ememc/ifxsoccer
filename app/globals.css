@@ -1078,6 +1078,8 @@ li {
   .nav__logo {
     flex: 0 0 auto;
     max-width: 15rem;
+    width: 10%;
+    height: 90%;
   }
 
   .nav__info {

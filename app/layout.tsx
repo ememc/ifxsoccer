@@ -1,5 +1,8 @@
 import Header from "./components/header";
 import Footer from "./components/footer";
+
+import Script from "next/script";
+
 import "./globals.css";
 
 export const metadata = {
@@ -11,8 +14,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <Header />
-        {children}
+
+        <main className="w-full min-h-screen">
+          {/* cuerpo en blanco */}
+          {children}
+        </main>
+
         <Footer />
+
+        <Script src="/assets/js/bundle.min.js" strategy="afterInteractive" />
+        <Script src="/assets/js/app.js" strategy="afterInteractive" />
+
       </body>
     </html>
   );
