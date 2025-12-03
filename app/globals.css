@@ -263,6 +263,8 @@ h4 {
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
+  width: 30%;
+  margin: 0 auto;
 }
 
 .boton:hover {
@@ -576,7 +578,7 @@ h4 {
 
 .inicio .contenido-hero .flecha-derecha:hover,
 .inicio .contenido-hero .flecha-izquierda:hover {
-  color: #0ff;
+  color: #cfcfcf;
 }
 
 .inicio .contenido-hero .flecha-derecha:active,
@@ -2230,4 +2232,30 @@ h2 {
 
 .btn-acordeon {
   display: none;
+}
+
+.carousel-item img {
+  width: 100%;
+  height: 600px;
+  object-fit: cover;
+}
+
+.carousel-caption p {
+  background-color: rgba(0, 0, 0, .4);
+  width: 100%;
+  border-radius: .35rem;
+  box-sizing: border-box;
+  color: #fff;
+  display: inline-block;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  font-size: 2.5rem;
+  font-family: Lato, sans-serif;
+  text-transform: uppercase;
+}
+
+@media (min-width: 380px) and (min-width: 768px) {
+  .carousel-caption p {
+    margin-top: 9rem;
+  }
 }
