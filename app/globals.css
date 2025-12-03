@@ -263,8 +263,6 @@ h4 {
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
-  width: 30%;
-  margin: 0 auto;
 }
 
 .boton:hover {
@@ -2258,4 +2256,19 @@ h2 {
   .carousel-caption p {
     margin-top: 9rem;
   }
+}
+
+.boton-hero {
+  background: #2f3878;
+  border-radius: .5rem;
+  color: #fff;
+  display: block;
+  font-weight: 400;
+  margin-top: 1.6666666667rem;
+  padding: 1rem 3rem;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  width: 30%;
+  margin: 0 auto;
 }

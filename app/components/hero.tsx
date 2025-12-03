@@ -24,7 +24,7 @@ export default function Hero() {
                         <img src="/assets/img/hero.jpg" className="d-block w-100" alt="Slide 1" style={{ objectFit: 'cover' }} />
                         <div className="carousel-caption d-none d-md-block">
                             <p>IFX is one of the oldest soccer agencies of its kind, combining soccer development and education programs in Europe.</p>
-                            <a className="boton">Schedule a Call</a>
+                            <a className="boton-hero">Schedule a Call</a>
                             <br />
                         </div>
                     </div>
@@ -33,7 +33,7 @@ export default function Hero() {
                         <img src="/assets/img/sliderBayernMunchenvsFronlach.jpg" className="d-block w-100" alt="Slide 2" style={{ objectFit: 'cover' }} />
                         <div className="carousel-caption d-none d-md-block">
                             <p>Some representative placeholder content for the first slide.</p>
-                            <a className="boton">Schedule a Call</a>
+                            <a className="boton-hero">Schedule a Call</a>
                             <br />
                         </div>
                     </div>
@@ -42,7 +42,7 @@ export default function Hero() {
                         <img src="/assets/img/soccer-trials-2.jpg" className="d-block w-100" alt="Slide 3" style={{ objectFit: 'cover' }} />
                         <div className="carousel-caption d-none d-md-block">
                             <p>Some representative placeholder content for the first slide.</p>
-                            <a className="boton">Schedule a Call</a>
+                            <a className="boton-hero">Schedule a Call</a>
                             <br />
                         </div>
                     </div>
