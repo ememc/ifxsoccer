@@ -117,6 +117,9 @@ export const getGalleryImages = async (): Promise<GalleryImage[]> => {
 export default function Gallery() {
     const [galleryItems, setGalleryItems] = useState<GalleryImage[]>([]);
     const [startIndex, setStartIndex] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(true);
 
     useEffect(() => {
         let mounted = true;
@@ -152,6 +155,35 @@ export default function Gallery() {
         setStartIndex((currentIndex) => (currentIndex + 1) % galleryItems.length);
     };
 
+    const openModal = (index: number) => {
+        setCurrentImageIndex(index);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
+    const nextImage = () => {
+        setCurrentImageIndex((prev) => (prev + 1) % galleryItems.length);
+    };
+
+    const prevImage = () => {
+        setCurrentImageIndex((prev) => (prev - 1 + galleryItems.length) % galleryItems.length);
+    };
+
+    useEffect(() => {
+        if (!isModalOpen || !isPlaying) {
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setCurrentImageIndex((prev) => (prev + 1) % galleryItems.length);
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [isModalOpen, isPlaying, galleryItems.length]);
+
     if (galleryItems.length === 0) {
         return null;
     }
@@ -177,13 +209,18 @@ export default function Gallery() {
                     )}
 
                     <div className="photo-gallery__grid">
-                        {visibleImages.map((item) => (
-                            <a href={item.href} className="photo-gallery__item" key={item.id}>
+                        {visibleImages.map((item, index) => (
+                            <button
+                                type="button"
+                                className="photo-gallery__item"
+                                key={item.id}
+                                onClick={() => openModal((startIndex + index) % galleryItems.length)}
+                            >
                                 <img src={item.image} alt={item.title} loading="lazy" />
                                 <div className="photo-caption">
                                     <p>{item.title}</p>
                                 </div>
-                            </a>
+                            </button>
                         ))}
                     </div>
 
@@ -199,6 +236,33 @@ export default function Gallery() {
                     )}
                 </div>
             </div>
+
+            {isModalOpen && (
+                <div className="gallery-modal" onClick={closeModal}>
+                    <div className="gallery-modal__content" onClick={(e) => e.stopPropagation()}>
+                        <button className="gallery-modal__close" onClick={closeModal}>
+                            <i className="fa-solid fa-times"></i>
+                        </button>
+                        <button className="gallery-modal__prev" onClick={prevImage}>
+                            <i className="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <img
+                            src={galleryItems[currentImageIndex].image}
+                            alt={galleryItems[currentImageIndex].title}
+                            className="gallery-modal__image"
+                        />
+                        <button className="gallery-modal__next" onClick={nextImage}>
+                            <i className="fa-solid fa-chevron-right"></i>
+                        </button>
+                        <div className="gallery-modal__caption">
+                            <p>{galleryItems[currentImageIndex].title}</p>
+                        </div>
+                        <button className="gallery-modal__play-pause" onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}>
+                            <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i>
+                        </button>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }

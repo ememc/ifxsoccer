@@ -1,65 +1,272 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { API_ENDPOINTS } from "../config/api";
+import api from "../services/api";
+
+type VideoItem = {
+    id: string;
+    title: string;
+    url: string;
+    video_url: string;
+    description: string;
+};
+
+type VideoRecord = Record<string, unknown>;
+
+const VISIBLE_VIDEOS = 3;
+
+const isRecord = (value: unknown): value is VideoRecord => (
+    typeof value === "object" && value !== null && !Array.isArray(value)
+);
+
+const getStringValue = (record: VideoRecord, keys: string[]) => {
+    for (const key of keys) {
+        const value = record[key];
+
+        if (typeof value === "string" && value.trim().length > 0) {
+            return value.trim();
+        }
+    }
+
+    return "";
+};
+
+const parseVideosResponse = (payload: unknown): VideoRecord[] => {
+    if (Array.isArray(payload)) {
+        return payload.filter(isRecord);
+    }
+
+    if (!isRecord(payload)) {
+        return [];
+    }
+
+    if (typeof payload.body === "string") {
+        try {
+            return parseVideosResponse(JSON.parse(payload.body));
+        } catch {
+            return [];
+        }
+    }
+
+    if (payload.body) {
+        return parseVideosResponse(payload.body);
+    }
+
+    const collectionKeys = ["videos", "video", "items", "gallery", "data", "results"];
+
+    for (const key of collectionKeys) {
+        const collection = payload[key];
+        const parsedCollection = parseVideosResponse(collection);
+
+        if (parsedCollection.length > 0) {
+            return parsedCollection;
+        }
+    }
+
+    return [];
+};
+
+const normalizeVideoItem = (item: VideoRecord, index: number): VideoItem | null => {
+    let video_url = getStringValue(item, [
+        "video_url",
+        "url",
+        "link",
+        "youtube_id",
+        "video",
+    ]);
+
+    // If video_url is just a YouTube ID, convert it to a proper URL
+    if (video_url && !video_url.includes("http") && !video_url.includes("youtube")) {
+        video_url = `https://www.youtube.com/watch?v=${video_url}`;
+    }
+
+    if (!video_url) {
+        return null;
+    }
+
+    const id = getStringValue(item, ["video_id", "id"]) || `${video_url}-${index}`;
+    const title = getStringValue(item, [
+        "video_title",
+        "title",
+        "name",
+    ]) || "IFX Soccer video";
+    const description = getStringValue(item, [
+        "video_description",
+        "description",
+        "caption",
+    ]) || "";
+    const url = getStringValue(item, ["video_link", "link", "href"]) || video_url;
+
+    return {
+        id,
+        title,
+        url,
+        video_url,
+        description,
+    };
+};
+
+export const getVideos = async (): Promise<VideoItem[]> => {
+    const response = await api.get<unknown>(API_ENDPOINTS.videos);
+
+    return parseVideosResponse(response.data)
+        .filter((item) => item.video_enabled !== false && item.enabled !== false)
+        .map(normalizeVideoItem)
+        .filter((item): item is VideoItem => item !== null);
+};
+
 export default function Video() {
+    const [videoItems, setVideoItems] = useState<VideoItem[]>([]);
+    const [startIndex, setStartIndex] = useState(0);
+    const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+
+    useEffect(() => {
+        let mounted = true;
+
+        getVideos()
+            .then((videos) => {
+                if (mounted) {
+                    setVideoItems(videos);
+                    setStartIndex(0);
+                }
+            })
+            .catch((error) => {
+                console.error("Error loading videos", error);
+            });
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const canSlide = videoItems.length > VISIBLE_VIDEOS;
+    const visibleVideos = canSlide
+        ? Array.from({ length: VISIBLE_VIDEOS }, (_, index) => videoItems[(startIndex + index) % videoItems.length])
+        : videoItems;
+
+    const handlePrevious = () => {
+        setStartIndex((currentIndex) => (
+            currentIndex === 0 ? videoItems.length - 1 : currentIndex - 1
+        ));
+    };
+
+    const handleNext = () => {
+        setStartIndex((currentIndex) => (currentIndex + 1) % videoItems.length);
+    };
+
+    const getEmbedUrl = (url: string): string => {
+        // Handle YouTube URLs
+        let videoId = url;
+        
+        // If it's a full YouTube URL
+        if (url.includes("youtube.com")) {
+            const match = url.match(/[?&]v=([^&]+)/);
+            if (match) videoId = match[1];
+        } else if (url.includes("youtu.be")) {
+            const match = url.match(/youtu\.be\/([^?]+)/);
+            if (match) videoId = match[1];
+        }
+        
+        return `https://www.youtube.com/embed/${videoId}`;
+    };
+
+    const getVideoId = (url: string): string => {
+        let videoId = url;
+        
+        if (url.includes("youtube.com")) {
+            const match = url.match(/[?&]v=([^&]+)/);
+            if (match) videoId = match[1];
+        } else if (url.includes("youtu.be")) {
+            const match = url.match(/youtu\.be\/([^?]+)/);
+            if (match) videoId = match[1];
+        }
+        
+        return videoId;
+    };
+
+    const getThumbnailUrl = (url: string): string => {
+        const videoId = getVideoId(url);
+        // Use hqdefault first, fallback to sddefault if needed
+        return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    };
+
+    if (videoItems.length === 0) {
+        return null;
+    }
+
     return (
         <div>
-            <section className="video-section">
-                <h2 className="video-section-title">Video Gallery</h2>
-                <div className="video-grid">
-                    <div className="video-item">
-                        <div className="video-iframe-wrapper">
-                            <iframe
-                                width="560" height="315"
-                                loading="lazy"
-                                src="https://www.youtube.com/embed/KGdrgTVzeKk?si=XKxTIRHnbu_PefNu"
-                                title="Video 1"
-                                // frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            // allowfullscreen
-                            ></iframe>
-                        </div>
-                        <div className="texto-video">
-                            <img src="/assets/img/balonDorado.png" alt="isotype IFX Soccer" />
-                            <p className="video-desc">Descripción del video 1</p>
-                        </div>
+            <section className="photo-gallery">
+                <div className="photo-gallery__container">
+                    <div className="photo-gallery__header">
+                        <h2 className="photo-gallery__title">Video Gallery</h2>
+                        <a href="#" className="photo-gallery__button">More Video Galleries</a>
                     </div>
-                    <div className="video-item">
-                        <div className="video-iframe-wrapper">
-                            <iframe
-                                width="560" height="315"
-                                loading="lazy"
-                                src="https://www.youtube.com/embed/THXM93j54nA?si=gAvuWKcPaZZXzJA9"
-                                title="Video 2"
-                                // frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            // allowfullscreen
-                            ></iframe>
+
+                    <div className={`video-gallery__carousel ${canSlide ? "" : "video-gallery__carousel--static"}`}>
+                        {canSlide && (
+                            <button
+                                type="button"
+                                className="video-gallery__control video-gallery__control--prev"
+                                aria-label="Previous videos"
+                                onClick={handlePrevious}
+                            >
+                                <i className="fa-solid fa-chevron-left"></i>
+                            </button>
+                        )}
+
+                        <div className="video-gallery__grid">
+                            {visibleVideos.map((item) => (
+                                <div className="video-gallery__item" key={item.id}>
+                                    <div 
+                                        className="video-gallery__iframe-wrapper"
+                                        onClick={() => setActiveVideoId(item.id)}
+                                    >
+                                        {activeVideoId === item.id ? (
+                                            <iframe
+                                                width="560"
+                                                height="315"
+                                                src={getEmbedUrl(item.video_url)}
+                                                title={item.title}
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            ></iframe>
+                                        ) : (
+                                            <>
+                                                <img 
+                                                    src={getThumbnailUrl(item.video_url)} 
+                                                    alt={item.title}
+                                                />
+                                                <button className="video-gallery__play-button">
+                                                    <i className="fa-solid fa-play"></i>
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                    <div className="video-gallery__caption">
+                                        <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                            <p>{item.title}</p>
+                                        </a>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                        <div className="texto-video">
-                            <img src="/assets/img/balonDorado.png" alt="isotype IFX Soccer" />
-                            <p className="video-desc">Descripción del video 2</p>
-                        </div>
+
+                        {canSlide && (
+                            <button
+                                type="button"
+                                className="video-gallery__control video-gallery__control--next"
+                                aria-label="Next videos"
+                                onClick={handleNext}
+                            >
+                                <i className="fa-solid fa-chevron-right"></i>
+                            </button>
+                        )}
                     </div>
-                    <div className="video-item">
-                        <div className="video-iframe-wrapper">
-                            <iframe
-                                width="560" height="315"
-                                loading="lazy"
-                                src="https://www.youtube.com/embed/KSL3D8Q7ni8?si=Szg7VoHhXfc-ZlZ9"
-                                title="Video 3"
-                                // frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            // allowfullscreen
-                            ></iframe>
-                        </div>
-                        <div className="texto-video">
-                            <img src="/assets/img/balonDorado.png" alt="isotype IFX Soccer" />
-                            <p className="video-desc">Descripción del video 3</p>
-                        </div>
-                    </div>
-                </div>
-                <div className="dosbotones">
-                    <a href="#" className="boton"><i className="fa-brands fa-youtube"></i> More Video Galleries</a>
                 </div>
             </section>
+
             <section className="imagen-videogallery">
                 <a href="#" className="boton-youtube"><i className="fa-brands fa-youtube"></i> Follow Us On YouTube</a>
             </section>
