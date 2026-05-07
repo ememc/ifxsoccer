@@ -36,16 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <main className="w-full min-h-screen">
           <Hero />
-          <Container />
-          <Category />
-          <Instagram />
-          <News />
-          <Subscribe />
-          <Video />
           <Gallery />
-          <Destination />
-          <More />
-          <Partner />
           {children}
         </main>
 

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync:s3": "aws s3 sync out s3://new.ifxsoccer.com --delete --no-verify-ssl"
   },
   "dependencies": {
     "axios": "^1.13.2",

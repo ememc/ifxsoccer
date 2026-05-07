@@ -1,7 +1,8 @@
 import axios from "axios";
+import { API_URL_BASE } from "../config/api";
 
 const api = axios.create({
-    baseURL: "https://pqzs7h6sgdo23n2ano66himzoy0jwuxw.lambda-url.us-west-1.on.aws/",
+    baseURL: API_URL_BASE,
     timeout: 10000,
     headers: {
         "Content-Type": "application/json",

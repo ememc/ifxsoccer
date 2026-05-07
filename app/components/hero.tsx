@@ -1,34 +1,97 @@
 'use client';
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { API_ENDPOINTS } from "../config/api";
 import api from "../services/api";
-import { useEffect, useState } from "react";
 
-export type GeneralData = {
-    id: string;
-    title: string;
-    image: string;
-    button: string;
-    call: string;
+export type HeroData = {
+    hero_id: string;
+    hero_button: string;
+    hero_call: string;
+    hero_date?: string;
+    hero_enabled?: boolean;
+    hero_image: string;
+    hero_title: string;
 };
 
-export const getHeroData = async (): Promise<GeneralData[]> => {
-    const response = await api.get("/");
-    return response.data;
+type HeroApiResponse =
+    | HeroData[]
+    | {
+        body?: string | HeroApiResponse;
+        hero?: HeroData[];
+        heros?: HeroData[];
+        items?: HeroData[];
+    };
+
+const parseHeroResponse = (payload: HeroApiResponse): HeroData[] => {
+    if (Array.isArray(payload)) {
+        return payload;
+    }
+
+    if (Array.isArray(payload.body)) {
+        return payload.body;
+    }
+
+    if (typeof payload.body === "string") {
+        try {
+            const parsedBody = JSON.parse(payload.body);
+            return parseHeroResponse(parsedBody);
+        } catch {
+            return [];
+        }
+    }
+
+    if (payload.body) {
+        return parseHeroResponse(payload.body);
+    }
+
+    return payload.hero ?? payload.heros ?? payload.items ?? [];
+};
+
+const hasButtonLabel = (buttonLabel: string) => {
+    const normalizedLabel = buttonLabel.trim();
+    return normalizedLabel.length > 0 && normalizedLabel !== "#";
+};
+
+const requestHeroData = async (endpoint: string): Promise<HeroData[]> => {
+    const response = await api.get<HeroApiResponse>(endpoint);
+    return parseHeroResponse(response.data).filter((item) => item.hero_enabled !== false);
+};
+
+export const getHeroData = async (): Promise<HeroData[]> => {
+    try {
+        return await requestHeroData(API_ENDPOINTS.heros);
+    } catch (error) {
+        console.warn("Primary hero endpoint failed, retrying fallback endpoint", error);
+        return requestHeroData(API_ENDPOINTS.herosFallback);
+    }
 };
 
 export default function Hero() {
 
-    const [heroData, setHeroData] = useState<GeneralData[] | null>(null);
+    const [heroData, setHeroData] = useState<HeroData[]>([]);
 
     useEffect(() => {
+        let mounted = true;
 
-        getHeroData().then((data) => {
-            setHeroData(data);
-        });
-        require('bootstrap/dist/js/bootstrap.bundle.min.js');
+        getHeroData()
+            .then((data) => {
+                if (mounted) {
+                    setHeroData(data);
+                }
+            })
+            .catch((error) => {
+                console.error("Error loading hero data", error);
+            });
+        void import('bootstrap/dist/js/bootstrap.bundle.min.js');
+
+        return () => {
+            mounted = false;
+        };
     }, []);
 
-    console.log(heroData);
+    if (heroData.length === 0) {
+        return null;
+    }
 
     return (
         <section className="carousel slide" data-ride="carousel">
@@ -38,7 +101,7 @@ export default function Hero() {
 
                 <div className="carousel-indicators">
                     {heroData?.map((item, index) => (
-                        <React.Fragment key={item.id}>
+                        <React.Fragment key={item.hero_id}>
                             <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to={index} className={index === 0 ? 'active' : ''}></button>
                         </React.Fragment>
                     ))}
@@ -46,12 +109,14 @@ export default function Hero() {
 
                 <div className="carousel-inner">
                     {heroData?.map((item, index) => (
-                        <React.Fragment key={item.id}>
+                        <React.Fragment key={item.hero_id}>
                             <div className={`carousel-item ${index === 0 ? 'active' : ''}`} >
-                                <img src={item.image} className="d-block w-100" alt={item.title} style={{ objectFit: 'cover' }} />
+                                <img src={item.hero_image} className="d-block w-100" alt={item.hero_title} style={{ objectFit: 'cover' }} />
                                 <div className="carousel-caption d-none d-md-block">
-                                    <p>{item.title}</p>
-                                    <a className="boton-hero" href={item.call} target="_#">{item.button}</a>
+                                    <p>{item.hero_title}</p>
+                                    {hasButtonLabel(item.hero_button) && (
+                                        <a className="boton-hero" href={item.hero_call || "#"}>{item.hero_button}</a>
+                                    )}
                                     <br />
                                 </div>
                             </div>
