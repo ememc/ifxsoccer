@@ -16,6 +16,35 @@ type VideoRecord = Record<string, unknown>;
 
 const VISIBLE_VIDEOS = 3;
 
+const getYouTubeVideoId = (value: string): string | null => {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.replace(/^www\./, "");
+
+    if (host === "youtu.be") {
+      return url.pathname.split("/").filter(Boolean)[0] ?? null;
+    }
+
+    if (!host.endsWith("youtube.com")) {
+      return null;
+    }
+
+    if (url.pathname === "/watch") {
+      return url.searchParams.get("v");
+    }
+
+    const [section, id] = url.pathname.split("/").filter(Boolean);
+
+    if (["embed", "shorts", "live"].includes(section)) {
+      return id ?? null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+};
+
 const isRecord = (value: unknown): value is VideoRecord => (
     typeof value === "object" && value !== null && !Array.isArray(value)
 );
@@ -156,19 +185,12 @@ export default function Video() {
     };
 
     const getEmbedUrl = (url: string): string => {
-        // Handle YouTube URLs
-        let videoId = url;
         
-        // If it's a full YouTube URL
-        if (url.includes("youtube.com")) {
-            const match = url.match(/[?&]v=([^&]+)/);
-            if (match) videoId = match[1];
-        } else if (url.includes("youtu.be")) {
-            const match = url.match(/youtu\.be\/([^?]+)/);
-            if (match) videoId = match[1];
-        }
+        const youTubeId = getYouTubeVideoId(url);
         
-        return `https://www.youtube.com/embed/${videoId}`;
+        console.log(`https://www.youtube.com/embed/${youTubeId}`)
+
+        return `https://www.youtube.com/embed/${youTubeId}`;
     };
 
     const getVideoId = (url: string): string => {
@@ -215,40 +237,20 @@ export default function Video() {
                                 <i className="fa-solid fa-chevron-left"></i>
                             </button>
                         )}
-
                         <div className="video-gallery__grid">
                             {visibleVideos.map((item) => (
                                 <div className="video-gallery__item" key={item.id}>
-                                    <div 
-                                        className="video-gallery__iframe-wrapper"
-                                        onClick={() => setActiveVideoId(item.id)}
-                                    >
-                                        {activeVideoId === item.id ? (
+                                    <div className="video-item">
+                                        <div className="video-iframe-wrapper">
                                             <iframe
                                                 width="560"
                                                 height="315"
                                                 src={getEmbedUrl(item.video_url)}
                                                 title={item.title}
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                            ></iframe>
-                                        ) : (
-                                            <>
-                                                <img 
-                                                    src={getThumbnailUrl(item.video_url)} 
-                                                    alt={item.title}
-                                                />
-                                                <button className="video-gallery__play-button">
-                                                    <i className="fa-solid fa-play"></i>
-                                                </button>
-                                            </>
-                                        )}
-                                    </div>
-                                    <div className="video-gallery__caption">
-                                        <a href={item.url} target="_blank" rel="noopener noreferrer">
-                                            <p>{item.title}</p>
-                                        </a>
-                                    </div>
+                                                allowFullScreen></iframe>
+                                        </div>        
+                                    </div>    
                                 </div>
                             ))}
                         </div>
@@ -268,7 +270,7 @@ export default function Video() {
             </section>
 
             <section className="imagen-videogallery">
-                <a href="#" className="boton-youtube"><i className="fa-brands fa-youtube"></i> Follow Us On YouTube</a>
+                <a href="https://www.youtube.com/@IFXSOCCER" target="_blank" className="boton-youtube"><i className="fa-brands fa-youtube"></i> Follow Us On YouTube</a>
             </section>
         </div>
     );

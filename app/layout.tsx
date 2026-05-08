@@ -16,6 +16,7 @@ import Script from "next/script";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+import "./styles/subscribe.css";
 import "./globals.css";
 
 export const metadata = {
@@ -36,8 +37,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <main className="w-full min-h-screen">
           <Hero />
-          <Gallery />
+          <Instagram/>
+          <Subscribe/>
           <Video />
+          <Gallery />
+          <Partner/>
           {children}
         </main>
 

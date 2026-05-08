@@ -189,80 +189,85 @@ export default function Gallery() {
     }
 
     return (
-        <section className="photo-gallery">
-            <div className="photo-gallery__container">
-                <div className="photo-gallery__header">
-                    <h2 className="photo-gallery__title">Photo Gallery</h2>
-                    <a href="#" className="photo-gallery__button">More Photo Galleries</a>
-                </div>
+        <div>
+            <section className="photo-gallery">
+                <div className="photo-gallery__container">
+                    <div className="photo-gallery__header">
+                        <h2 className="photo-gallery__title">Photo Gallery</h2>
+                        <a href="#" className="photo-gallery__button">More Photo Galleries</a>
+                    </div>
 
-                <div className={`photo-gallery__carousel ${canSlide ? "" : "photo-gallery__carousel--static"}`}>
-                    {canSlide && (
-                        <button
-                            type="button"
-                            className="photo-gallery__control photo-gallery__control--prev"
-                            aria-label="Previous gallery images"
-                            onClick={handlePrevious}
-                        >
-                            <i className="fa-solid fa-chevron-left"></i>
-                        </button>
-                    )}
-
-                    <div className="photo-gallery__grid">
-                        {visibleImages.map((item, index) => (
+                    <div className={`photo-gallery__carousel ${canSlide ? "" : "photo-gallery__carousel--static"}`}>
+                        {canSlide && (
                             <button
                                 type="button"
-                                className="photo-gallery__item"
-                                key={item.id}
-                                onClick={() => openModal((startIndex + index) % galleryItems.length)}
+                                className="photo-gallery__control photo-gallery__control--prev"
+                                aria-label="Previous gallery images"
+                                onClick={handlePrevious}
                             >
-                                <img src={item.image} alt={item.title} loading="lazy" />
-                                <div className="photo-caption">
-                                    <p>{item.title}</p>
-                                </div>
+                                <i className="fa-solid fa-chevron-left"></i>
                             </button>
-                        ))}
-                    </div>
+                        )}
 
-                    {canSlide && (
-                        <button
-                            type="button"
-                            className="photo-gallery__control photo-gallery__control--next"
-                            aria-label="Next gallery images"
-                            onClick={handleNext}
-                        >
-                            <i className="fa-solid fa-chevron-right"></i>
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            {isModalOpen && (
-                <div className="gallery-modal" onClick={closeModal}>
-                    <div className="gallery-modal__content" onClick={(e) => e.stopPropagation()}>
-                        <button className="gallery-modal__close" onClick={closeModal}>
-                            <i className="fa-solid fa-times"></i>
-                        </button>
-                        <button className="gallery-modal__prev" onClick={prevImage}>
-                            <i className="fa-solid fa-chevron-left"></i>
-                        </button>
-                        <img
-                            src={galleryItems[currentImageIndex].image}
-                            alt={galleryItems[currentImageIndex].title}
-                            className="gallery-modal__image"
-                        />
-                        <button className="gallery-modal__next" onClick={nextImage}>
-                            <i className="fa-solid fa-chevron-right"></i>
-                        </button>
-                        <div className="gallery-modal__caption">
-                            <p>{galleryItems[currentImageIndex].title}</p>
+                        <div className="photo-gallery__grid">
+                            {visibleImages.map((item, index) => (
+                                <button
+                                    type="button"
+                                    className="photo-gallery__item"
+                                    key={item.id}
+                                    onClick={() => openModal((startIndex + index) % galleryItems.length)}
+                                >
+                                    <img src={item.image} alt={item.title} loading="lazy" />
+                                    <div className="photo-caption">
+                                        <p>{item.title}</p>
+                                    </div>
+                                </button>
+                            ))}
                         </div>
-                        <button className="gallery-modal__play-pause" onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}>
-                            <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i>
-                        </button>
+
+                        {canSlide && (
+                            <button
+                                type="button"
+                                className="photo-gallery__control photo-gallery__control--next"
+                                aria-label="Next gallery images"
+                                onClick={handleNext}
+                            >
+                                <i className="fa-solid fa-chevron-right"></i>
+                            </button>
+                        )}
                     </div>
                 </div>
-            )}
-        </section>
+
+                {isModalOpen && (
+                    <div className="gallery-modal" onClick={closeModal}>
+                        <div className="gallery-modal__content" onClick={(e) => e.stopPropagation()}>
+                            <button className="gallery-modal__close" onClick={closeModal}>
+                                <i className="fa-solid fa-times"></i>
+                            </button>
+                            <button className="gallery-modal__prev" onClick={prevImage}>
+                                <i className="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <img
+                                src={galleryItems[currentImageIndex].image}
+                                alt={galleryItems[currentImageIndex].title}
+                                className="gallery-modal__image"
+                            />
+                            <button className="gallery-modal__next" onClick={nextImage}>
+                                <i className="fa-solid fa-chevron-right"></i>
+                            </button>
+                            <div className="gallery-modal__caption">
+                                <p>{galleryItems[currentImageIndex].title}</p>
+                            </div>
+                            <button className="gallery-modal__play-pause" onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}>
+                                <i className={`fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i>
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </section>
+            <section className="imagen-photogallery">
+                <a href="https://www.facebook.com/IFX.Soccer.Camps" target="_blank" className="boton-gallery"><i className="fa-brands fa-facebook"></i> Join Us On Facebook</a>
+            </section>
+        </div>
     );
 }
