@@ -1,9 +1,13 @@
 export default function Destination() {
     return (
         <div>
-            <section className="destinations">
+            <section className="seccion contenedor">
+                <div className="pphoto-gallery__title">
+                    <div className="photo-gallery__header">
+                        <h2 className="photo-gallery__title">Destinations</h2>
+                    </div>
+                </div>
                 <div className="contenedor">
-                    <h2>Destinations</h2>
                     <div className="photo-grid">
 
                         <div className="country">

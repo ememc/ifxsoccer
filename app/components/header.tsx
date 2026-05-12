@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import logo from "@/public/assets/img/logo alta.png";
+import Link from "next/link";
+import logo from "@/public/assets/img/logo alta.webp";
 
 export default function Header() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -17,12 +18,14 @@ export default function Header() {
             <nav className="nav container">
                 <div className="nav__data">
                     {/* logo */}
-                    <Image
-                        src={logo}
-                        alt="IFX Soccer Logo"
-                        className="nav__logo"
-                        priority
-                    />
+                    <Link href="/" className="nav__brand" aria-label="IFX Soccer home">
+                        <Image
+                            src={logo}
+                            alt="IFX Soccer Logo"
+                            className="nav__logo"
+                            priority
+                        />
+                    </Link>
                     {/* info */}
                     <div className="nav__info">
                         <div className="nav__contact">

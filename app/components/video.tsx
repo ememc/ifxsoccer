@@ -219,14 +219,14 @@ export default function Video() {
 
     return (
         <div>
-            <section className="photo-gallery">
-                <div className="photo-gallery__container">
+            <section className="seccion contenedor">
+                <div className="pphoto-gallery__title">
                     <div className="photo-gallery__header">
                         <h2 className="photo-gallery__title">Video Gallery</h2>
                         <a href="#" className="photo-gallery__button">More Video Galleries</a>
                     </div>
-
-                    <div className={`video-gallery__carousel ${canSlide ? "" : "video-gallery__carousel--static"}`}>
+                </div>
+                <div className={`video-gallery__carousel ${canSlide ? "" : "video-gallery__carousel--static"}`}>
                         {canSlide && (
                             <button
                                 type="button"
@@ -266,9 +266,7 @@ export default function Video() {
                             </button>
                         )}
                     </div>
-                </div>
             </section>
-
             <section className="imagen-videogallery">
                 <a href="https://www.youtube.com/@IFXSOCCER" target="_blank" className="boton-youtube"><i className="fa-brands fa-youtube"></i> Follow Us On YouTube</a>
             </section>

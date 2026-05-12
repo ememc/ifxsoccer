@@ -1,76 +1,62 @@
 export default function Category() {
     return (
-        <section className="categorias imagen-categorias">
-            <div className="seccion contenedor">
-                <h2>
-                    Soccer Training Programs in Europe
+        <div>
+            <br/>
+            <br/>
+            <section className="seccion contenedor">
+                <h2 className="photo-gallery__title">
+                    Soccer Schools, Camps and International Academies
                 </h2>
-                <div className="contenido-categorias">
-                    <div className="categoria">
-                        <picture>
-                            <source srcSet="/assets/img/P30D-IFX.webp" type="image/webp" />
-                            <source srcSet="/assets/img/P30D-IFX.jpg" type="image/jpeg" />
-                            <img loading="lazy" src="/assets/img/P30D-IFX.jpg" alt="pro year germany" />
-                        </picture>
-
-                        <div className="contenido-categoria especial">
-                            <h3>Soccer Trials</h3>
-                            <p>IFX is recognized as an expert in the facilitation of pro and semi pro soccer team tryouts in Europe and Youth Soccer club tryouts, especially in Germany. </p>
-                            <div>
-                                <a href="#" className="boton-cyan">learn more</a>
+                <div className="contenedor-programas">
+                    <div className="programa">
+                            <picture>
+                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/webp"></source>
+                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/jpeg"></source>
+                                <img loading="lazy" src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" alt="pro year germany"></img>
+                            </picture>
+                            <div className="contenido-programa especial">
+                                <h3>Pro Year Germany</h3>
+                                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio est nemo mollitia maxime magnam. Optio vitae natus, </p>
+                                <div className="botones">
+                                    <a href="#" className="boton-programa">learn more</a>
+                                    <a href="#" className="boton-programa-azul">Apply online</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="programa">
+                            <picture>
+                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/webp"></source>
+                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/jpeg"></source>
+                                <img loading="lazy" src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" alt="pro year germany"></img>
+                            </picture>
+                            <div className="contenido-programa especial">
+                                <h3>Pro Year Germany</h3>
+                                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio est nemo mollitia maxime magnam. Optio vitae natus, </p>
+                                <div className="botones">
+                                    <a href="#" className="boton-programa">learn more</a>
+                                    <a href="#" className="boton-programa-azul">Apply online</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="programa">
+                            <picture>
+                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/webp"></source>
+                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/jpeg"></source>
+                                <img loading="lazy" src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" alt="pro year germany"></img>
+                            </picture>
+                            <div className="contenido-programa especial">
+                                <h3>Pro Year Germany</h3>
+                                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio est nemo mollitia maxime magnam. Optio vitae natus, </p>
+                                <div className="botones">
+                                    <a href="#" className="boton-programa">learn more</a>
+                                    <a href="#" className="boton-programa-azul">Apply online</a>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    <div className="categoria">
-                        <picture>
-                            <source srcSet="/assets/img/intl-soccer-academies.webp" type="image/webp" />
-                            <source srcSet="/assets/img/intl-soccer-academies.jpg" type="image/jpeg" />
-                            <img loading="lazy" src="/assets/img/intl-soccer-academies.jpg" alt="pro year germany" />
-                        </picture>
-
-                        <div className="contenido-categoria">
-                            <h3>international soccer academies</h3>
-                            <p>IFX Soccer facilitates opportunities for student athletes from across the globe to pursue international education and European soccer development. </p>
-                            <div>
-                                <a href="#" className="boton-cyan">learn more</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="categoria">
-                        <picture>
-                            <source srcSet="/assets/img/summer-soccer-camps-germany.webp" type="image/webp" />
-                            <source srcSet="/assets/img/summer-soccer-camps-germany.jpg" type="image/jpeg" />
-                            <img loading="lazy" src="/assets/img/summer-soccer-camps-germany.jpg" alt="pro year germany" />
-                        </picture>
-
-                        <div className="contenido-categoria especial">
-                            <h3>Youth Soccer Camps</h3>
-                            <p>IFX Soccer International summer camps are all residential soccer camnps encompassing the training philosophies and methodologies of the professional clubs. </p>
-                            <div>
-                                <a href="#" className="boton-cyan">learn more</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="categoria">
-                        <picture>
-                            <source srcSet="/assets/img/team-training.webp" type="image/webp" />
-                            <source srcSet="/assets/img/team-training.jpg" type="image/jpeg" />
-                            <img loading="lazy" src="/assets/img/team-training.jpg" alt="pro year germany" />
-                        </picture>
-
-                        <div className="contenido-categoria">
-                            <h3>International Soccer Tours</h3>
-                            <p>IFX offers customized Soccer Tours for all level travel soccer teams to experience professional soccer training and similar level opposition overseas.</p>
-                            <div>
-                                <a href="#" className="boton-cyan dist-boton">learn more</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+                    
+            </section>
+            
+        </div>
     );
 }

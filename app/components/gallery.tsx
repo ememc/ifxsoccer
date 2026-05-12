@@ -190,14 +190,14 @@ export default function Gallery() {
 
     return (
         <div>
-            <section className="photo-gallery">
-                <div className="photo-gallery__container">
+            <section className="seccion contenedor">
+                <div className="pphoto-gallery__title">
                     <div className="photo-gallery__header">
                         <h2 className="photo-gallery__title">Photo Gallery</h2>
                         <a href="#" className="photo-gallery__button">More Photo Galleries</a>
                     </div>
-
-                    <div className={`photo-gallery__carousel ${canSlide ? "" : "photo-gallery__carousel--static"}`}>
+                </div>
+                <div className={`photo-gallery__carousel ${canSlide ? "" : "photo-gallery__carousel--static"}`}>
                         {canSlide && (
                             <button
                                 type="button"
@@ -236,9 +236,7 @@ export default function Gallery() {
                             </button>
                         )}
                     </div>
-                </div>
-
-                {isModalOpen && (
+                    {isModalOpen && (
                     <div className="gallery-modal" onClick={closeModal}>
                         <div className="gallery-modal__content" onClick={(e) => e.stopPropagation()}>
                             <button className="gallery-modal__close" onClick={closeModal}>
@@ -265,6 +263,7 @@ export default function Gallery() {
                     </div>
                 )}
             </section>
+
             <section className="imagen-photogallery">
                 <a href="https://www.facebook.com/IFX.Soccer.Camps" target="_blank" className="boton-gallery"><i className="fa-brands fa-facebook"></i> Join Us On Facebook</a>
             </section>
