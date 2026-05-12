@@ -2816,6 +2816,13 @@ h2 {
   font-weight: 700;
 }
 
+.country .cities {
+  color: #2f3878;
+  font-size: 1.5rem;
+  line-height: 1.8;
+  padding-top: .8rem;
+}
+
 .no-webp .imagen-destinations {
   background-image: url(components/assets/img/destacada04.jpg);
 }

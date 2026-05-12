@@ -7,4 +7,5 @@ export const API_ENDPOINTS = {
     news: "/v1/news/",
     videos: "/v1/videos/",
     programs: "/v1/programs/",
+    destinations: "/v1/destination",
 } as const;
