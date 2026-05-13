@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
 import api from "../services/api";
+import { useResponsiveCount } from "./use-responsive-count";
 
 type GalleryImage = {
     id: string;
@@ -120,6 +121,10 @@ export default function Gallery() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(true);
+    const visibleCount = useResponsiveCount({
+        desktop: VISIBLE_IMAGES,
+        mobile: 1,
+    });
 
     useEffect(() => {
         let mounted = true;
@@ -140,9 +145,9 @@ export default function Gallery() {
         };
     }, []);
 
-    const canSlide = galleryItems.length > VISIBLE_IMAGES;
+    const canSlide = galleryItems.length > visibleCount;
     const visibleImages = canSlide
-        ? Array.from({ length: VISIBLE_IMAGES }, (_, index) => galleryItems[(startIndex + index) % galleryItems.length])
+        ? Array.from({ length: visibleCount }, (_, index) => galleryItems[(startIndex + index) % galleryItems.length])
         : galleryItems;
 
     const handlePrevious = () => {

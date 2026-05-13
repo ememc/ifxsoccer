@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
 import { getProgramPath, type Program } from "../lib/programs";
 import api from "../services/api";
+import { useResponsiveCount } from "./use-responsive-count";
 
 type ProgramRecord = Record<string, unknown>;
 
@@ -16,7 +17,6 @@ type ProgramItem = {
     imageUrl: string;
 };
 
-const DEFAULT_VISIBLE_PROGRAMS = 3;
 const FALLBACK_PROGRAM_IMAGE = "https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg";
 
 const isRecord = (value: unknown): value is ProgramRecord => (
@@ -127,6 +127,11 @@ const getCategoryPrograms = async (): Promise<ProgramItem[]> => {
 export default function Category() {
     const [programs, setPrograms] = useState<ProgramItem[]>([]);
     const [startIndex, setStartIndex] = useState(0);
+    const visibleCount = useResponsiveCount({
+        desktop: 3,
+        tablet: 2,
+        mobile: 1,
+    });
 
     useEffect(() => {
         let mounted = true;
@@ -151,10 +156,10 @@ export default function Category() {
         return null;
     }
 
-    const canSlide = programs.length > DEFAULT_VISIBLE_PROGRAMS;
+    const canSlide = programs.length > visibleCount;
     const visiblePrograms = canSlide
         ? Array.from(
-            { length: DEFAULT_VISIBLE_PROGRAMS },
+            { length: visibleCount },
             (_, index) => programs[(startIndex + index) % programs.length]
         )
         : programs;

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
 import api from "../services/api";
+import { useResponsiveCount } from "./use-responsive-count";
 
 type VideoItem = {
     id: string;
@@ -148,7 +149,10 @@ export const getVideos = async (): Promise<VideoItem[]> => {
 export default function Video() {
     const [videoItems, setVideoItems] = useState<VideoItem[]>([]);
     const [startIndex, setStartIndex] = useState(0);
-    const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+    const visibleCount = useResponsiveCount({
+        desktop: VISIBLE_VIDEOS,
+        mobile: 1,
+    });
 
     useEffect(() => {
         let mounted = true;
@@ -169,9 +173,9 @@ export default function Video() {
         };
     }, []);
 
-    const canSlide = videoItems.length > VISIBLE_VIDEOS;
+    const canSlide = videoItems.length > visibleCount;
     const visibleVideos = canSlide
-        ? Array.from({ length: VISIBLE_VIDEOS }, (_, index) => videoItems[(startIndex + index) % videoItems.length])
+        ? Array.from({ length: visibleCount }, (_, index) => videoItems[(startIndex + index) % videoItems.length])
         : videoItems;
 
     const handlePrevious = () => {
@@ -191,26 +195,6 @@ export default function Video() {
         console.log(`https://www.youtube.com/embed/${youTubeId}`)
 
         return `https://www.youtube.com/embed/${youTubeId}`;
-    };
-
-    const getVideoId = (url: string): string => {
-        let videoId = url;
-        
-        if (url.includes("youtube.com")) {
-            const match = url.match(/[?&]v=([^&]+)/);
-            if (match) videoId = match[1];
-        } else if (url.includes("youtu.be")) {
-            const match = url.match(/youtu\.be\/([^?]+)/);
-            if (match) videoId = match[1];
-        }
-        
-        return videoId;
-    };
-
-    const getThumbnailUrl = (url: string): string => {
-        const videoId = getVideoId(url);
-        // Use hqdefault first, fallback to sddefault if needed
-        return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
     };
 
     if (videoItems.length === 0) {
