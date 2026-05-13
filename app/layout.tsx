@@ -1,16 +1,5 @@
 import Header from "./components/header";
 import Footer from "./components/footer";
-import Hero from "./components/hero";
-import Container from "./components/container";
-import Category from "./components/category";
-import Instagram from "./components/instagram";
-import News from "./components/news";
-import Subscribe from "./components/subscribe";
-import Video from "./components/video";
-import Gallery from "./components/gallery";
-import Destination from "./components/destination";
-import More from "./components/more";
-import Partner from "./components/partner";
 
 import Script from "next/script";
 
@@ -36,15 +25,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
 
         <main className="w-full min-h-screen">
-          <Hero />
-          <Category/>  
-          <Instagram/>
-          <News/>
-          <Subscribe/>
-          <Video />
-          <Gallery />
-          <Destination/>
-          <Partner/>
           {children}
         </main>
 

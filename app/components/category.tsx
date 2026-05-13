@@ -1,4 +1,13 @@
-export default function Category() {
+import Link from "next/link";
+import { getProgramPath, getPrograms, type Program } from "../lib/programs";
+
+const getHeroImage = (program: Program) =>
+    program.program_hero?.find((hero) => hero.image_url)?.image_url ||
+    "https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg";
+
+export default async function Category() {
+    const programs = await getPrograms();
+
     return (
         <div>
             <br/>
@@ -8,51 +17,27 @@ export default function Category() {
                     Soccer Schools, Camps and International Academies
                 </h2>
                 <div className="contenedor-programas">
-                    <div className="programa">
+                    {programs.map((program) => {
+                        const heroImage = getHeroImage(program);
+
+                        return (
+                        <div className="programa" key={program.program_id}>
                             <picture>
-                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/webp"></source>
-                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/jpeg"></source>
-                                <img loading="lazy" src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" alt="pro year germany"></img>
+                                <source src={heroImage} type="image/webp"></source>
+                                <source src={heroImage} type="image/jpeg"></source>
+                                <img loading="lazy" src={heroImage} alt={program.program_title}></img>
                             </picture>
                             <div className="contenido-programa especial">
-                                <h3>Pro Year Germany</h3>
-                                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio est nemo mollitia maxime magnam. Optio vitae natus, </p>
+                                <h3>{program.program_title}</h3>
+                                <p>{program.program_description}</p>
                                 <div className="botones">
-                                    <a href="#" className="boton-programa">learn more</a>
-                                    <a href="#" className="boton-programa-azul">Apply online</a>
+                                    <Link href={getProgramPath(program)} className="boton-programa">learn more</Link>
+                                    <a href={program.program_apply || "https://ifxsoccer.com/apply"} className="boton-programa-azul">Apply online</a>
                                 </div>
                             </div>
                         </div>
-                        <div className="programa">
-                            <picture>
-                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/webp"></source>
-                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/jpeg"></source>
-                                <img loading="lazy" src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" alt="pro year germany"></img>
-                            </picture>
-                            <div className="contenido-programa especial">
-                                <h3>Pro Year Germany</h3>
-                                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio est nemo mollitia maxime magnam. Optio vitae natus, </p>
-                                <div className="botones">
-                                    <a href="#" className="boton-programa">learn more</a>
-                                    <a href="#" className="boton-programa-azul">Apply online</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="programa">
-                            <picture>
-                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/webp"></source>
-                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" type="image/jpeg"></source>
-                                <img loading="lazy" src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg" alt="pro year germany"></img>
-                            </picture>
-                            <div className="contenido-programa especial">
-                                <h3>Pro Year Germany</h3>
-                                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Odio est nemo mollitia maxime magnam. Optio vitae natus, </p>
-                                <div className="botones">
-                                    <a href="#" className="boton-programa">learn more</a>
-                                    <a href="#" className="boton-programa-azul">Apply online</a>
-                                </div>
-                            </div>
-                        </div>
+                        );
+                    })}
                     </div>
                     
             </section>
