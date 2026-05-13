@@ -54,11 +54,11 @@ export type Program = {
   program_enabled?: boolean;
   program_hero?: ProgramHero[];
   program_section?: ProgramSection[];
-  program_details?: ProgramDetail[];
-  program_information?: ProgramInformation[];
-  program_variations?: ProgramVariation[];
-  program_addons?: ProgramAddon[];
-  program_players?: ProgramPlayer[];
+  program_details?: ProgramDetail[] | ProgramDetail;
+  program_information?: ProgramInformation[] | ProgramInformation;
+  program_variations?: ProgramVariation[] | ProgramVariation;
+  program_addons?: ProgramAddon[] | ProgramAddon;
+  program_players?: ProgramPlayer[] | ProgramPlayer;
   program_slug?: string;
   canonical_url?: string;
   program_canonical?: string;

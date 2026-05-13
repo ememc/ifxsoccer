@@ -198,7 +198,7 @@ export default function Category() {
                                 </picture>
                                 <div className={`contenido-programa ${index === 0 ? "especial" : ""}`.trim()}>
                                     <h3>{program.title}</h3>
-                                    <p>{program.description}</p>
+                                    <p className="programa-descripcion">{program.description}</p>
                                     <div className="botones">
                                         <a href={program.canonicalUrl} className="boton-programa">learn more</a>
                                         <a href={program.applyUrl} className="boton-programa-azul">Apply online</a>
