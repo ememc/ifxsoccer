@@ -1,9 +1,176 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { API_ENDPOINTS } from "../config/api";
+import api from "../services/api";
+
+type NewsRecord = Record<string, unknown>;
+
+type NewsItem = {
+    id: string;
+    title: string;
+    description: string;
+    image: string;
+    href: string;
+    date: string;
+    timestamp: number;
+    principal: boolean;
+};
+
+const isRecord = (value: unknown): value is NewsRecord => (
+    typeof value === "object" && value !== null && !Array.isArray(value)
+);
+
+const getStringValue = (record: NewsRecord, keys: string[]) => {
+    for (const key of keys) {
+        const value = record[key];
+
+        if (typeof value === "string" && value.trim().length > 0) {
+            return value.trim();
+        }
+    }
+
+    return "";
+};
+
+const getBooleanValue = (record: NewsRecord, keys: string[]) => {
+    for (const key of keys) {
+        const value = record[key];
+
+        if (typeof value === "boolean") {
+            return value;
+        }
+
+        if (typeof value === "string") {
+            const normalized = value.trim().toLowerCase();
+
+            if (normalized === "true") {
+                return true;
+            }
+
+            if (normalized === "false") {
+                return false;
+            }
+        }
+    }
+
+    return false;
+};
+
+const parseNewsResponse = (payload: unknown): NewsRecord[] => {
+    if (Array.isArray(payload)) {
+        return payload.filter(isRecord);
+    }
+
+    if (!isRecord(payload)) {
+        return [];
+    }
+
+    if (typeof payload.body === "string") {
+        try {
+            return parseNewsResponse(JSON.parse(payload.body));
+        } catch {
+            return [];
+        }
+    }
+
+    if (payload.body) {
+        return parseNewsResponse(payload.body);
+    }
+
+    const collectionKeys = ["news", "items", "data", "results"];
+
+    for (const key of collectionKeys) {
+        const collection = payload[key];
+        const parsedCollection = parseNewsResponse(collection);
+
+        if (parsedCollection.length > 0) {
+            return parsedCollection;
+        }
+    }
+
+    return [];
+};
+
+const normalizeNewsItem = (item: NewsRecord, index: number): NewsItem | null => {
+    const title = getStringValue(item, ["news_title", "title", "name"]);
+    const image = getStringValue(item, ["news_image", "image", "image_url", "url"]);
+
+    if (!title || !image) {
+        return null;
+    }
+
+    const description = getStringValue(item, ["news_description", "news_text", "description", "excerpt"]);
+    const href = getStringValue(item, ["news_call", "news_link", "link", "href"]) || "#";
+    const id = getStringValue(item, ["news_id", "id"]) || `${title}-${index}`;
+    const date = getStringValue(item, ["news_date", "date", "published_at", "created_at"]);
+    const parsedDate = Date.parse(date);
+
+    return {
+        id,
+        title,
+        description,
+        image,
+        href,
+        date,
+        timestamp: Number.isNaN(parsedDate) ? 0 : parsedDate,
+        principal: getBooleanValue(item, ["news_principal", "principal"]),
+    };
+};
+
+const getNews = async (): Promise<NewsItem[]> => {
+    const response = await api.get<unknown>(API_ENDPOINTS.news);
+    const publishedNews = parseNewsResponse(response.data)
+        .filter((item) => item.news_enabled !== false && item.enabled !== false)
+        .filter((item) => getStringValue(item, ["news_state", "state", "status"]).toLowerCase() === "published")
+        .map(normalizeNewsItem)
+        .filter((item): item is NewsItem => item !== null)
+        .sort((a, b) => b.timestamp - a.timestamp);
+
+    const principalNews = publishedNews.find((item) => item.principal) ?? publishedNews[0];
+
+    if (!principalNews) {
+        return [];
+    }
+
+    const secondaryNews = publishedNews
+        .filter((item) => item.id !== principalNews.id)
+        .slice(0, 2);
+
+    return [principalNews, ...secondaryNews].slice(0, 3);
+};
+
 export default function News() {
+    const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+
+    useEffect(() => {
+        let mounted = true;
+
+        getNews()
+            .then((items) => {
+                if (mounted) {
+                    setNewsItems(items);
+                }
+            })
+            .catch((error) => {
+                console.error("Error loading news", error);
+            });
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    if (newsItems.length === 0) {
+        return null;
+    }
+
+    const [mainNews, ...secondaryNews] = newsItems;
+
     return (
-        
         <div>
-            <br/>
-            <br/>
+            <br />
+            <br />
             <section className="seccion contenedor">
                 <div className="pphoto-gallery__title">
                     <div className="photo-gallery__header">
@@ -12,65 +179,43 @@ export default function News() {
                     </div>
                 </div>
                 <div>
-                    <br/>
+                    <br />
                 </div>
                 <div className="contenedor-news">
-                    <a href="#">
+                    <a href={mainNews.href}>
                         <div className="noti-principal">
                             <div className="title-header">
-                                <h3>
-                                Gianluca and Alberto Valle: Youth Talent Development Through a Soccer Year in Germany
-                                </h3>
-                            </div>
-                            
-                            <picture className="first-new">
-                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/1778561341303-noticia1.jpg" type="image/webp"></source>
-                                <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/1778561341303-noticia1.jpg" type="image/jpeg"></source>
-                                <img loading="lazy" src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/1778561341303-noticia1.jpg" alt="noticia principal"></img>
-                            </picture>
-                        
-                            <div className="excerpt">
-                                <p>
-                                Brothers Gianluca and Alberto Valle share their journey from Ecuador to Germany at Soccer City boarding school.
-                                </p>
+                                <h3>{mainNews.title}</h3>
                             </div>
 
+                            <picture className="first-new">
+                                <source srcSet={mainNews.image} type="image/webp"></source>
+                                <source srcSet={mainNews.image} type="image/jpeg"></source>
+                                <img loading="lazy" src={mainNews.image} alt={mainNews.title}></img>
+                            </picture>
+
+                            <div className="excerpt">
+                                <p>{mainNews.description}</p>
+                            </div>
                         </div>
                     </a>
 
-                    <div className="noti-secundarias">  
-                        <a href="#">
-                            <div className="noticia2">
-                                <picture className="first-new">
-                                    <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/1778561586283-noticia2.jpg" type="image/webp"></source>
-                                    <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/1778561586283-noticia2.jpg" type="image/jpeg"></source>
-                                    <img loading="lazy" src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/1778561586283-noticia2.jpg" alt="noticia principal"></img>
-                                </picture>
-                            
-                                <div className="excerpt">
-                                    <p>
-                                    Brothers Gianluca and Alberto Valle share their journey from Ecuador to Germany at Soccer City boarding school.
-                                    </p>
+                    <div className="noti-secundarias">
+                        {secondaryNews.map((item, index) => (
+                            <a href={item.href} key={item.id}>
+                                <div className={index === 0 ? "noticia2" : "noticia3"}>
+                                    <picture className="first-new">
+                                        <source srcSet={item.image} type="image/webp"></source>
+                                        <source srcSet={item.image} type="image/jpeg"></source>
+                                        <img loading="lazy" src={item.image} alt={item.title}></img>
+                                    </picture>
+
+                                    <div className="excerpt">
+                                        <p>{item.title}</p>
+                                    </div>
                                 </div>
-
-                            </div>
-                        </a>
-
-                        <a href="#">
-                            <div className="noticia3">   
-                                <picture className="first-new">
-                                    <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/1778561634625-noticia3.jpg" type="image/webp"></source>
-                                    <source src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/1778561634625-noticia3.jpg" type="image/jpeg"></source>
-                                    <img loading="lazy" src="https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/1778561634625-noticia3.jpg" alt="noticia principal"></img>
-                                </picture>
-                        
-                                <div className="excerpt">
-                                    <p>
-                                    Brothers Gianluca and Alberto Valle share their journey from Ecuador to Germany at Soccer City boarding school.
-                                    </p>
-                                </div>                      
-                            </div>
-                        </a>
+                            </a>
+                        ))}
                     </div>
                 </div>
 
