@@ -17,6 +17,8 @@ type NewsItem = {
     principal: boolean;
 };
 
+const DEFAULT_VISIBLE_NEWS = 3;
+
 const isRecord = (value: unknown): value is NewsRecord => (
     typeof value === "object" && value !== null && !Array.isArray(value)
 );
@@ -133,15 +135,14 @@ const getNews = async (): Promise<NewsItem[]> => {
         return [];
     }
 
-    const secondaryNews = publishedNews
-        .filter((item) => item.id !== principalNews.id)
-        .slice(0, 2);
+    const secondaryNews = publishedNews.filter((item) => item.id !== principalNews.id);
 
-    return [principalNews, ...secondaryNews].slice(0, 3);
+    return [principalNews, ...secondaryNews];
 };
 
 export default function News() {
     const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+    const [startIndex, setStartIndex] = useState(0);
 
     useEffect(() => {
         let mounted = true;
@@ -150,6 +151,7 @@ export default function News() {
             .then((items) => {
                 if (mounted) {
                     setNewsItems(items);
+                    setStartIndex(0);
                 }
             })
             .catch((error) => {
@@ -165,7 +167,22 @@ export default function News() {
         return null;
     }
 
-    const [mainNews, ...secondaryNews] = newsItems;
+    const canSlide = newsItems.length > 1;
+    const visibleNews = Array.from(
+        { length: Math.min(DEFAULT_VISIBLE_NEWS, newsItems.length) },
+        (_, index) => newsItems[(startIndex + index) % newsItems.length]
+    );
+    const [mainNews, ...secondaryNews] = visibleNews;
+
+    const handlePrevious = () => {
+        setStartIndex((currentIndex) => (
+            currentIndex === 0 ? newsItems.length - 1 : currentIndex - 1
+        ));
+    };
+
+    const handleNext = () => {
+        setStartIndex((currentIndex) => (currentIndex + 1) % newsItems.length);
+    };
 
     return (
         <div>
@@ -181,42 +198,66 @@ export default function News() {
                 <div>
                     <br />
                 </div>
-                <div className="contenedor-news">
-                    <a href={mainNews.href}>
-                        <div className="noti-principal">
-                            <div className="title-header">
-                                <h3>{mainNews.title}</h3>
-                            </div>
+                <div className={`programs-carousel ${canSlide ? "" : "programs-carousel--static"}`.trim()}>
+                    {canSlide && (
+                        <button
+                            type="button"
+                            className="photo-gallery__control programs-carousel__control"
+                            aria-label="Previous news"
+                            onClick={handlePrevious}
+                        >
+                            <i className="fa-solid fa-chevron-left"></i>
+                        </button>
+                    )}
 
-                            <picture className="first-new">
-                                <source srcSet={mainNews.image} type="image/webp"></source>
-                                <source srcSet={mainNews.image} type="image/jpeg"></source>
-                                <img loading="lazy" src={mainNews.image} alt={mainNews.title}></img>
-                            </picture>
-
-                            <div className="excerpt">
-                                <p>{mainNews.description}</p>
-                            </div>
-                        </div>
-                    </a>
-
-                    <div className="noti-secundarias">
-                        {secondaryNews.map((item, index) => (
-                            <a href={item.href} key={item.id}>
-                                <div className={index === 0 ? "noticia2" : "noticia3"}>
-                                    <picture className="first-new">
-                                        <source srcSet={item.image} type="image/webp"></source>
-                                        <source srcSet={item.image} type="image/jpeg"></source>
-                                        <img loading="lazy" src={item.image} alt={item.title}></img>
-                                    </picture>
-
-                                    <div className="excerpt">
-                                        <p>{item.title}</p>
-                                    </div>
+                    <div className="contenedor-news">
+                        <a href={mainNews.href}>
+                            <div className="noti-principal">
+                                <div className="title-header">
+                                    <h3>{mainNews.title}</h3>
                                 </div>
-                            </a>
-                        ))}
+
+                                <picture className="first-new">
+                                    <source srcSet={mainNews.image} type="image/webp"></source>
+                                    <source srcSet={mainNews.image} type="image/jpeg"></source>
+                                    <img loading="lazy" src={mainNews.image} alt={mainNews.title}></img>
+                                </picture>
+
+                                <div className="excerpt">
+                                    <p>{mainNews.description}</p>
+                                </div>
+                            </div>
+                        </a>
+
+                        <div className="noti-secundarias">
+                            {secondaryNews.map((item, index) => (
+                                <a href={item.href} key={item.id}>
+                                    <div className={index === 0 ? "noticia2" : "noticia3"}>
+                                        <picture className="first-new">
+                                            <source srcSet={item.image} type="image/webp"></source>
+                                            <source srcSet={item.image} type="image/jpeg"></source>
+                                            <img loading="lazy" src={item.image} alt={item.title}></img>
+                                        </picture>
+
+                                        <div className="excerpt">
+                                            <p>{item.title}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
                     </div>
+
+                    {canSlide && (
+                        <button
+                            type="button"
+                            className="photo-gallery__control programs-carousel__control"
+                            aria-label="Next news"
+                            onClick={handleNext}
+                        >
+                            <i className="fa-solid fa-chevron-right"></i>
+                        </button>
+                    )}
                 </div>
 
                 <div className="boton-base">

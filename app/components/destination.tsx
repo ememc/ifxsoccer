@@ -11,11 +11,12 @@ type DestinationCity = {
 type DestinationItem = {
     id: string;
     title: string;
-    imageUrl: string;
+    imageUrls: string[];
     cities: DestinationCity[];
 };
 
 const DEFAULT_VISIBLE_DESTINATIONS = 3;
+const DESTINATION_IMAGE_ROTATION_INTERVAL = 5000;
 const FALLBACK_DESTINATION_IMAGE = "/assets/img/photo6.jpg";
 
 const isRecord = (value: unknown): value is DestinationRecord =>
@@ -66,12 +67,14 @@ const parseDestinationResponse = (payload: unknown): DestinationRecord[] => {
     return [];
 };
 
-const getDestinationHeroImage = (item: DestinationRecord) => {
+const getDestinationHeroImages = (item: DestinationRecord) => {
     const heroCollection = item.destination_hero;
 
     if (!Array.isArray(heroCollection)) {
-        return "";
+        return [];
     }
+
+    const images: string[] = [];
 
     for (const heroItem of heroCollection) {
         if (!isRecord(heroItem)) {
@@ -80,11 +83,11 @@ const getDestinationHeroImage = (item: DestinationRecord) => {
 
         const imageUrl = getStringValue(heroItem, ["image_url"]);
         if (imageUrl) {
-            return imageUrl;
+            images.push(imageUrl);
         }
     }
 
-    return "";
+    return images;
 };
 
 const getDestinationCities = (item: DestinationRecord): DestinationCity[] => {
@@ -114,7 +117,7 @@ const normalizeDestinationItem = (item: DestinationRecord, index: number): Desti
     return {
         id: getStringValue(item, ["destination_id", "id"]) || `${title}-${index}`,
         title,
-        imageUrl: getDestinationHeroImage(item) || FALLBACK_DESTINATION_IMAGE,
+        imageUrls: getDestinationHeroImages(item),
         cities: getDestinationCities(item),
     };
 };
@@ -136,6 +139,7 @@ const getDestinations = async (): Promise<DestinationItem[]> => {
 export default function Destination() {
     const [destinations, setDestinations] = useState<DestinationItem[]>([]);
     const [startIndex, setStartIndex] = useState(0);
+    const [imageIndex, setImageIndex] = useState(0);
 
     useEffect(() => {
         let mounted = true;
@@ -144,6 +148,8 @@ export default function Destination() {
             .then((items) => {
                 if (mounted) {
                     setDestinations(items);
+                    setStartIndex(0);
+                    setImageIndex(0);
                 }
             })
             .catch((error) => {
@@ -155,17 +161,28 @@ export default function Destination() {
         };
     }, []);
 
+    useEffect(() => {
+        if (!destinations.some((destination) => destination.imageUrls.length > 1)) {
+            return;
+        }
+
+        const interval = window.setInterval(() => {
+            setImageIndex((currentIndex) => currentIndex + 1);
+        }, DESTINATION_IMAGE_ROTATION_INTERVAL);
+
+        return () => {
+            window.clearInterval(interval);
+        };
+    }, [destinations]);
+
     if (destinations.length === 0) {
         return null;
     }
 
-    const canSlide = destinations.length > DEFAULT_VISIBLE_DESTINATIONS;
-    const visibleDestinations = canSlide
-        ? Array.from(
-              { length: DEFAULT_VISIBLE_DESTINATIONS },
-              (_, index) => destinations[(startIndex + index) % destinations.length]
-          )
-        : destinations.slice(0, DEFAULT_VISIBLE_DESTINATIONS);
+    const visibleDestinations = Array.from(
+        { length: Math.min(DEFAULT_VISIBLE_DESTINATIONS, destinations.length) },
+        (_, index) => destinations[(startIndex + index) % destinations.length]
+    );
 
     const handlePrevious = () => {
         setStartIndex((currentIndex) =>
@@ -186,22 +203,28 @@ export default function Destination() {
                     </div>
                 </div>
 
-                <div className={`programs-carousel ${canSlide ? "" : "programs-carousel--static"}`.trim()}>
-                    {canSlide && (
-                        <button
-                            type="button"
-                            className="photo-gallery__control programs-carousel__control"
-                            aria-label="Previous destinations"
-                            onClick={handlePrevious}
-                        >
-                            <i className="fas fa-chevron-left" aria-hidden="true"></i>
-                        </button>
-                    )}
+                <div className="programs-carousel">
+                    <button
+                        type="button"
+                        className="photo-gallery__control programs-carousel__control"
+                        aria-label="Previous destinations"
+                        onClick={handlePrevious}
+                    >
+                        <i className="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                    </button>
 
                     <div className="photo-grid">
                         {visibleDestinations.map((destination) => (
                             <div className="country" key={destination.id}>
-                                <img src={destination.imageUrl} alt={destination.title} loading="lazy" />
+                                <img
+                                    src={
+                                        destination.imageUrls.length > 0
+                                            ? destination.imageUrls[imageIndex % destination.imageUrls.length]
+                                            : FALLBACK_DESTINATION_IMAGE
+                                    }
+                                    alt={destination.title}
+                                    loading="lazy"
+                                />
                                 <h4>{destination.title}</h4>
                                 {destination.cities.length > 0 && (
                                     <div className="cities">
@@ -217,16 +240,14 @@ export default function Destination() {
                         ))}
                     </div>
 
-                    {canSlide && (
-                        <button
-                            type="button"
-                            className="photo-gallery__control programs-carousel__control"
-                            aria-label="Next destinations"
-                            onClick={handleNext}
-                        >
-                            <i className="fas fa-chevron-right" aria-hidden="true"></i>
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        className="photo-gallery__control programs-carousel__control"
+                        aria-label="Next destinations"
+                        onClick={handleNext}
+                    >
+                        <i className="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </button>
                 </div>
             </section>
 

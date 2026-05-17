@@ -112,7 +112,7 @@ export const getProgramSlug = (program: Program) => {
   return slugifyProgramTitle(program.program_title);
 };
 
-export const getProgramPath = (program: Program) => `/programs/${getProgramSlug(program)}`;
+export const getProgramPath = (program: Program) => `/programs/${getProgramSlug(program)}/`;
 
 export const getProgramCanonicalUrl = (program: Program) => {
   const adminCanonical = program.canonical_url || program.program_canonical || program.program_url;

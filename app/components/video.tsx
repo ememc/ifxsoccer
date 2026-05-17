@@ -173,10 +173,11 @@ export default function Video() {
         };
     }, []);
 
-    const canSlide = videoItems.length > visibleCount;
-    const visibleVideos = canSlide
-        ? Array.from({ length: visibleCount }, (_, index) => videoItems[(startIndex + index) % videoItems.length])
-        : videoItems;
+    const canSlide = videoItems.length > 1;
+    const visibleVideos = Array.from(
+        { length: Math.min(visibleCount, videoItems.length) },
+        (_, index) => videoItems[(startIndex + index) % videoItems.length]
+    );
 
     const handlePrevious = () => {
         setStartIndex((currentIndex) => (
@@ -210,11 +211,11 @@ export default function Video() {
                         <a href="#" className="photo-gallery__button">More Video Galleries</a>
                     </div>
                 </div>
-                <div className={`video-gallery__carousel ${canSlide ? "" : "video-gallery__carousel--static"}`}>
+                <div className={`video-gallery__carousel programs-carousel ${canSlide ? "" : "programs-carousel--static"}`.trim()}>
                         {canSlide && (
                             <button
                                 type="button"
-                                className="video-gallery__control video-gallery__control--prev"
+                                className="photo-gallery__control programs-carousel__control"
                                 aria-label="Previous videos"
                                 onClick={handlePrevious}
                             >
@@ -233,7 +234,12 @@ export default function Video() {
                                                 title={item.title}
                                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                 allowFullScreen></iframe>
-                                        </div>        
+                                        </div>
+                                        {item.title && (
+                                            <div className="video-gallery__caption">
+                                                <p>{item.title}</p>
+                                            </div>
+                                        )}
                                     </div>    
                                 </div>
                             ))}
@@ -242,7 +248,7 @@ export default function Video() {
                         {canSlide && (
                             <button
                                 type="button"
-                                className="video-gallery__control video-gallery__control--next"
+                                className="photo-gallery__control programs-carousel__control"
                                 aria-label="Next videos"
                                 onClick={handleNext}
                             >

@@ -410,7 +410,7 @@ export default async function ProgramDetail({ program }: ProgramDetailProps) {
                   ></iframe>
                 </div>
                 <div className="texto-video">
-                  <p className="video-desc">{video.description}</p>
+                  <p className="video-desc">{video.title}</p>
                 </div>
               </div>
             ))}
