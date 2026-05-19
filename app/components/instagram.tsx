@@ -1,14 +1,28 @@
+import instagramFeed from "../data/instagram-feed.json";
+
 const INSTAGRAM_URL = "https://www.instagram.com/ifx.soccer.agency/";
 
-const instagramImages = Array.from({ length: 6 }, (_, index) => {
+type InstagramFeedItem = {
+    id: string;
+    alt: string;
+    imageUrl: string;
+    permalink: string;
+};
+
+const fallbackImages: InstagramFeedItem[] = Array.from({ length: 6 }, (_, index) => {
     const imageNumber = index + 1;
 
     return {
+        id: `fallback-${imageNumber}`,
         alt: `IFX Soccer Instagram post ${imageNumber}`,
-        jpg: `/assets/img/insta-${imageNumber}.jpg`,
-        webp: `/assets/img/insta-${imageNumber}.webp`,
+        imageUrl: `/assets/img/insta-${imageNumber}.jpg`,
+        permalink: INSTAGRAM_URL,
     };
 });
+
+const instagramImages = Array.isArray(instagramFeed.items) && instagramFeed.items.length > 0
+    ? instagramFeed.items
+    : fallbackImages;
 
 export default function Instagram() {
     return (
@@ -34,15 +48,12 @@ export default function Instagram() {
                     {instagramImages.map((image) => (
                         <a
                             className="instagram-item"
-                            href={INSTAGRAM_URL}
+                            href={image.permalink || INSTAGRAM_URL}
                             target="_blank"
                             rel="noopener noreferrer"
-                            key={image.jpg}
+                            key={image.id}
                         >
-                            <picture>
-                                <source srcSet={image.webp} type="image/webp" />
-                                <img src={image.jpg} alt={image.alt} loading="lazy" />
-                            </picture>
+                            <img src={image.imageUrl} alt={image.alt} loading="lazy" />
                         </a>
                     ))}
                 </div>

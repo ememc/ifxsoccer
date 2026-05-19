@@ -53,12 +53,12 @@ export default function Header() {
             </nav>
             {/* MENU BAR */}
             <div className="nav__bar">
-                <div
-                    id="nav-menu"
-                    className={`nav__menu container contenedor ${menuOpen ? "show-menu" : ""
-                        }`}
-                >
-                    <ul className="nav__list">
+                <div className="nav__bar-inner contenedor">
+                    <div
+                        id="nav-menu"
+                        className={`nav__menu ${menuOpen ? "show-menu" : ""}`}
+                    >
+                        <ul className="nav__list">
                         {/* DROPDOWN 1 */}
                         <li className="dropdown__item">
                             <div
@@ -204,7 +204,8 @@ export default function Header() {
                             <a href="#" className="nav__link">IFX News</a>
                         </li>
 
-                    </ul>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </header >

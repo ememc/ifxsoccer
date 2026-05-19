@@ -195,12 +195,12 @@ body {
   font-family: Lato, sans-serif;
   font-size: 1.6rem;
   line-height: 1.8;
-  padding-top: 6rem;
+  padding-top: 6.5rem;
 }
 
 @media (min-width: 1024px) {
   body {
-    padding-top: 11rem;
+    padding-top: 10rem;
   }
 }
 
@@ -962,6 +962,11 @@ h4 {
   justify-content: center;
 }
 
+.nav__bar-inner {
+  position: relative;
+  width: 100%;
+}
+
 .dropdown__list img {
   display: inline-block;
   height: auto;
@@ -1195,29 +1200,34 @@ li {
     padding: 0;
   }
 
+  .nav__bar-inner {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  }
+
   .nav__menu {
     background-color: transparent !important;
     display: flex !important;
     height: auto !important;
     margin: 0 auto;
-    max-width: 120rem;
     opacity: 1 !important;
     overflow: visible !important;
     padding: 0 !important;
     pointer-events: auto !important;
     position: static !important;
     top: auto !important;
-    width: 95% !important;
+    width: 100% !important;
   }
 
   .nav__menu ul {
     display: flex;
     gap: 0;
-    justify-content: center;
+    justify-content: space-between;
     list-style: none;
     margin: 0;
     padding: 0;
-    width: auto;
+    width: 100%;
   }
 
   .dropdown__item,
@@ -2957,6 +2967,52 @@ h2 {
   object-fit: cover;
 }
 
+.carousel-caption {
+  bottom: auto;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hero-carousel__control {
+  bottom: auto;
+  height: 4.8rem;
+  margin: 0;
+  opacity: 1;
+  padding: 0;
+  top: 45%;
+  transform: translateY(-50%);
+  width: 4.8rem;
+}
+
+.hero-carousel__control.carousel-control-prev {
+  left: 2rem;
+}
+
+.hero-carousel__control.carousel-control-next {
+  right: 2rem;
+}
+
+.hero-carousel__control.carousel-control-prev,
+.hero-carousel__control.carousel-control-next {
+  bottom: auto;
+  display: inline-flex;
+  flex: 0 0 4.8rem;
+  opacity: 1;
+  top: 45%;
+  opacity: 1;
+  transform: translateY(-50%);
+  width: 4.8rem;
+}
+
+.hero-carousel__control i {
+  line-height: 1;
+}
+
+.hero-carousel__control:hover,
+.hero-carousel__control:focus {
+  opacity: 1;
+}
+
 .carousel-caption p {
   background-color: rgba(0, 0, 0, .4);
   width: 100%;
@@ -2973,7 +3029,17 @@ h2 {
 
 @media (min-width: 768px) {
   .carousel-caption p {
-    margin-top: 9rem;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-carousel__control.carousel-control-prev {
+    left: 1rem;
+  }
+
+  .hero-carousel__control.carousel-control-next {
+    right: 1rem;
   }
 }
 
@@ -4616,4 +4682,13 @@ td.cost {
   list-style-type: disc;
   list-style-position: inside; /* o outside */
   margin-left: 0.5rem; /* ajuste visual */
+}
+
+/* */
+.w-full
+{
+} 
+
+.min-h-screen
+{
 }

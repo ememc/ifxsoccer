@@ -123,12 +123,24 @@ export default function Hero() {
                         </React.Fragment>
                     ))}
 
-                    <button className="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
-                        <span className="carousel-control-prev-icon"></span>
+                    <button
+                        className="carousel-control-prev hero-carousel__control photo-gallery__control"
+                        type="button"
+                        data-bs-target="#mainCarousel"
+                        data-bs-slide="prev"
+                        aria-label="Previous hero image"
+                    >
+                        <i className="fa-solid fa-chevron-left" aria-hidden="true"></i>
                     </button>
 
-                    <button className="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
-                        <span className="carousel-control-next-icon"></span>
+                    <button
+                        className="carousel-control-next hero-carousel__control photo-gallery__control"
+                        type="button"
+                        data-bs-target="#mainCarousel"
+                        data-bs-slide="next"
+                        aria-label="Next hero image"
+                    >
+                        <i className="fa-solid fa-chevron-right" aria-hidden="true"></i>
                     </button>
 
                 </div>

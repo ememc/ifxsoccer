@@ -1,6 +1,5 @@
 import Hero from "./components/hero";
 import Category from "./components/category";
-import Instagram from "./components/instagram";
 import News from "./components/news";
 import Subscribe from "./components/subscribe";
 import Video from "./components/video";
@@ -13,7 +12,6 @@ export default function Page() {
     <>
       <Hero />
       <Category />
-      <Instagram />
       <News />
       <Subscribe />
       <Video />
