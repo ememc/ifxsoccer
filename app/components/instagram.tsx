@@ -1,5 +1,3 @@
-import instagramFeed from "../data/instagram-feed.json";
-
 const INSTAGRAM_URL = "https://www.instagram.com/ifx.soccer.agency/";
 
 type InstagramFeedItem = {
@@ -9,20 +7,16 @@ type InstagramFeedItem = {
     permalink: string;
 };
 
-const fallbackImages: InstagramFeedItem[] = Array.from({ length: 6 }, (_, index) => {
+const instagramImages: InstagramFeedItem[] = Array.from({ length: 6 }, (_, index) => {
     const imageNumber = index + 1;
 
     return {
-        id: `fallback-${imageNumber}`,
+        id: `static-${imageNumber}`,
         alt: `IFX Soccer Instagram post ${imageNumber}`,
         imageUrl: `/assets/img/insta-${imageNumber}.jpg`,
         permalink: INSTAGRAM_URL,
     };
 });
-
-const instagramImages = Array.isArray(instagramFeed.items) && instagramFeed.items.length > 0
-    ? instagramFeed.items
-    : fallbackImages;
 
 export default function Instagram() {
     return (

@@ -246,8 +246,8 @@ h4 {
 }
 
 .seccion {
-  margin-bottom: 2.5rem;
-  margin-top: 2.5rem;
+  margin-bottom: 0;
+  margin-top: 5rem;
 }
 
 .contenido-centrado {
@@ -560,6 +560,10 @@ h4 {
 @media (max-width: 767px) {
   .footer .contenedor {
     width: calc(100% - 4rem);
+  }
+
+  .sec-aboutus {
+    padding: 1.5rem 0 1rem;
   }
 
   .sec-aboutus h4,
@@ -1595,6 +1599,7 @@ li {
     display: grid;
     gap: 1fr;
     grid-template-columns: repeat(4, 1fr);
+    justify-items: center;
   }
 }
 
@@ -1607,6 +1612,7 @@ li {
     display: grid;
     gap: 1fr;
     grid-template-columns: repeat(5, 1fr);
+    justify-items: center;
   }
 }
 
@@ -1619,6 +1625,7 @@ li {
     display: grid;
     gap: 1fr;
     grid-template-columns: repeat(7, 1fr);
+    justify-items: center;
   }
 }
 
@@ -2850,7 +2857,8 @@ h2 {
 .country img {
   border-radius: .9rem;
   display: block;
-  width: 100%
+  width: 100%;
+  height: 18rem;
 }
 
 .country h4 {
@@ -2887,7 +2895,7 @@ h2 {
   background-size: cover;
   display: flex;
   flex-direction: column;
-  height: 50rem;
+  height: 58rem;
   justify-content: center;
   padding: 5rem 0;
   text-align: center;
@@ -2902,7 +2910,7 @@ h2 {
 
 @media (min-width: 768px) {
   .imagen-destinations {
-    height: 35rem;
+    height: 50rem;
   }
 }
 
@@ -3395,6 +3403,10 @@ h2 {
   margin-top: auto;
 }
 
+.category-section .contenido-programa h3 {
+  margin-bottom: 2rem;
+}
+
 .programs-carousel__control {
   flex-shrink: 0;
 }
@@ -3412,10 +3424,34 @@ h2 {
 }
 
 @media (max-width: 767px) {
+  .news-section .photo-gallery__header .photo-gallery__button,
+  .media-gallery-section .photo-gallery__header .photo-gallery__button {
+    display: none;
+  }
+
+  .country img {
+    aspect-ratio: 16/9;
+    height: auto;
+    object-fit: cover;
+  }
+
   .programs-carousel {
     gap: 1.6rem;
     grid-template-columns: 4rem minmax(0, 1fr) 4rem;
     margin-top: 3rem;
+  }
+
+  .programs-carousel .botones {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .programs-carousel .boton-programa,
+  .programs-carousel .boton-programa-azul {
+    max-width: 24rem;
+    width: 100%;
   }
 
   .programs-carousel__control {

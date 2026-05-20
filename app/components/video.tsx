@@ -204,7 +204,7 @@ export default function Video() {
 
     return (
         <div>
-            <section className="seccion contenedor">
+            <section className="seccion contenedor media-gallery-section">
                 <div className="pphoto-gallery__title">
                     <div className="photo-gallery__header">
                         <h2 className="photo-gallery__title">Video Gallery</h2>
@@ -256,8 +256,11 @@ export default function Video() {
                             </button>
                         )}
                     </div>
+                <div className="boton-base">
+                    <a href="#" className="boton boton-news">More Video Galleries</a>
+                </div>
             </section>
-            <section className="imagen-videogallery">
+            <section className="imagen-videogallery seccion">
                 <a href="https://www.youtube.com/@IFXSOCCER" target="_blank" className="boton-youtube"><i className="fa-brands fa-youtube"></i> Follow Us On YouTube</a>
             </section>
         </div>

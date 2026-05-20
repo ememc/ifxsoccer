@@ -1,16 +1,24 @@
 /* eslint-disable @next/next/no-img-element */
+import type { ReactNode } from "react";
 import type { Program, ProgramSection } from "../lib/programs";
 import { getProgramPhotos, getProgramVideos } from "../lib/galleries";
 import ProgramHeroCarousel from "./ProgramHeroCarousel";
 
 type ProgramDetailProps = {
   program: Program;
+  HeroCarousel?: HeroCarouselComponent;
 };
 
 type InternalNavItem = {
   label: string;
   href: string;
 };
+
+type HeroCarouselComponent = (props: {
+  applyUrl: string;
+  fallbackTitle: string;
+  heroes?: Program["program_hero"];
+}) => ReactNode;
 
 export const getProgramHeroImage = (program: Program) =>
   program.program_hero?.find((hero) => hero.image_url)?.image_url ||
@@ -140,7 +148,10 @@ const renderDetailText = (text: string | undefined, keyPrefix: string) => {
   ));
 };
 
-export default async function ProgramDetail({ program }: ProgramDetailProps) {
+export default async function ProgramDetail({
+  program,
+  HeroCarousel = ProgramHeroCarousel,
+}: ProgramDetailProps) {
   const sections = getOrderedSections(program);
   const details = toArray(program.program_details);
   const information = toArray(program.program_information);
@@ -267,7 +278,7 @@ export default async function ProgramDetail({ program }: ProgramDetailProps) {
         )}
       </div>
 
-      <ProgramHeroCarousel
+      <HeroCarousel
         applyUrl={program.program_apply || "https://ifxsoccer.com/apply"}
         fallbackTitle={program.program_title}
         heroes={program.program_hero}

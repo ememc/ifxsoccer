@@ -186,17 +186,12 @@ export default function News() {
 
     return (
         <div>
-            <br />
-            <br />
-            <section className="seccion contenedor">
+            <section className="seccion contenedor news-section">
                 <div className="pphoto-gallery__title">
                     <div className="photo-gallery__header">
                         <h2 className="photo-gallery__title">IFX Player News</h2>
                         <a href="#" className="photo-gallery__button">More Player News</a>
                     </div>
-                </div>
-                <div>
-                    <br />
                 </div>
                 <div className={`programs-carousel ${canSlide ? "" : "programs-carousel--static"}`.trim()}>
                     {canSlide && (

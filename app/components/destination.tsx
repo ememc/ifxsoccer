@@ -251,7 +251,7 @@ export default function Destination() {
                 </div>
             </section>
 
-            <section className="imagen-destinations">
+            <section className="imagen-destinations seccion">
                 <h2>...the real experience of playing Soccer Internationally</h2>
             </section>
         </div>

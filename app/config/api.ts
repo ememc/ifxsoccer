@@ -4,6 +4,7 @@ export const API_URL_BASE =
 export const API_ENDPOINTS = {
     heros: "/heros/",
     herosFallback: "/v1/heros/",
+    category: "/v1/category",
     images: "/v1/images/",
     news: "/v1/news/",
     programs: "/v1/programs/",

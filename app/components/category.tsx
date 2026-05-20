@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
-import { getProgramPath, type Program } from "../lib/programs";
+import { getCategoryPath, type Category as CategoryData } from "../lib/categories";
 import api from "../services/api";
 import { useResponsiveCount } from "./use-responsive-count";
 
-type ProgramRecord = Record<string, unknown>;
+type CategoryRecord = Record<string, unknown>;
 
-type ProgramItem = {
+type CategoryItem = {
     id: string;
     title: string;
     description: string;
@@ -17,13 +17,13 @@ type ProgramItem = {
     imageUrl: string;
 };
 
-const FALLBACK_PROGRAM_IMAGE = "https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg";
+const FALLBACK_CATEGORY_IMAGE = "https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg";
 
-const isRecord = (value: unknown): value is ProgramRecord => (
+const isRecord = (value: unknown): value is CategoryRecord => (
     typeof value === "object" && value !== null && !Array.isArray(value)
 );
 
-const getStringValue = (record: ProgramRecord, keys: string[]) => {
+const getStringValue = (record: CategoryRecord, keys: string[]) => {
     for (const key of keys) {
         const value = record[key];
 
@@ -35,8 +35,8 @@ const getStringValue = (record: ProgramRecord, keys: string[]) => {
     return "";
 };
 
-const getProgramHeroImage = (item: ProgramRecord) => {
-    const heroCollection = item.program_hero;
+const getCategoryHeroImage = (item: CategoryRecord) => {
+    const heroCollection = item.category_hero ?? item.program_hero;
 
     if (!Array.isArray(heroCollection)) {
         return "";
@@ -47,7 +47,7 @@ const getProgramHeroImage = (item: ProgramRecord) => {
             continue;
         }
 
-        const imageUrl = getStringValue(heroItem, ["image_url"]);
+        const imageUrl = getStringValue(heroItem, ["image_url", "category_image", "image"]);
 
         if (imageUrl) {
             return imageUrl;
@@ -57,7 +57,7 @@ const getProgramHeroImage = (item: ProgramRecord) => {
     return "";
 };
 
-const parseProgramsResponse = (payload: unknown): ProgramRecord[] => {
+const parseCategoriesResponse = (payload: unknown): CategoryRecord[] => {
     if (Array.isArray(payload)) {
         return payload.filter(isRecord);
     }
@@ -68,21 +68,21 @@ const parseProgramsResponse = (payload: unknown): ProgramRecord[] => {
 
     if (typeof payload.body === "string") {
         try {
-            return parseProgramsResponse(JSON.parse(payload.body));
+            return parseCategoriesResponse(JSON.parse(payload.body));
         } catch {
             return [];
         }
     }
 
     if (payload.body) {
-        return parseProgramsResponse(payload.body);
+        return parseCategoriesResponse(payload.body);
     }
 
-    const collectionKeys = ["programs", "program", "items", "data", "results"];
+    const collectionKeys = ["category", "categories", "items", "data", "results"];
 
     for (const key of collectionKeys) {
         const collection = payload[key];
-        const parsedCollection = parseProgramsResponse(collection);
+        const parsedCollection = parseCategoriesResponse(collection);
 
         if (parsedCollection.length > 0) {
             return parsedCollection;
@@ -92,40 +92,40 @@ const parseProgramsResponse = (payload: unknown): ProgramRecord[] => {
     return [];
 };
 
-const normalizeProgramItem = (item: ProgramRecord, index: number): ProgramItem | null => {
-    const title = getStringValue(item, ["program_title", "title", "name"]);
+const normalizeCategoryItem = (item: CategoryRecord, index: number): CategoryItem | null => {
+    const title = getStringValue(item, ["category_title", "title", "name"]);
 
     if (!title) {
         return null;
     }
 
-    const program = {
+    const category = {
         ...item,
-        program_id: getStringValue(item, ["program_id", "id"]) || `${title}-${index}`,
-        program_title: title,
-    } as Program;
+        category_id: getStringValue(item, ["category_id", "id"]) || `${title}-${index}`,
+        category_title: title,
+    } as CategoryData;
 
     return {
-        id: program.program_id,
+        id: category.category_id,
         title,
-        description: getStringValue(item, ["program_description", "description"]),
-        applyUrl: getStringValue(item, ["program_apply", "apply_url", "apply", "link"]) || "https://ifxsoccer.com/apply",
-        canonicalUrl: getProgramPath(program),
-        imageUrl: getProgramHeroImage(item) || FALLBACK_PROGRAM_IMAGE,
+        description: getStringValue(item, ["category_description", "description"]),
+        applyUrl: getStringValue(item, ["category_apply", "apply_url", "apply", "link"]) || "https://ifxsoccer.com/apply",
+        canonicalUrl: getCategoryPath(category),
+        imageUrl: getCategoryHeroImage(item) || FALLBACK_CATEGORY_IMAGE,
     };
 };
 
-const getCategoryPrograms = async (): Promise<ProgramItem[]> => {
-    const response = await api.get<unknown>(API_ENDPOINTS.programs);
+const getCategories = async (): Promise<CategoryItem[]> => {
+    const response = await api.get<unknown>(API_ENDPOINTS.category);
 
-    return parseProgramsResponse(response.data)
-        .filter((item) => item.program_enabled !== false && item.enabled !== false)
-        .map(normalizeProgramItem)
-        .filter((item): item is ProgramItem => item !== null);
+    return parseCategoriesResponse(response.data)
+        .filter((item) => item.category_enabled !== false && item.enabled !== false)
+        .map(normalizeCategoryItem)
+        .filter((item): item is CategoryItem => item !== null);
 };
 
 export default function Category() {
-    const [programs, setPrograms] = useState<ProgramItem[]>([]);
+    const [categories, setCategories] = useState<CategoryItem[]>([]);
     const [startIndex, setStartIndex] = useState(0);
     const visibleCount = useResponsiveCount({
         desktop: 3,
@@ -136,15 +136,15 @@ export default function Category() {
     useEffect(() => {
         let mounted = true;
 
-        getCategoryPrograms()
+        getCategories()
             .then((items) => {
                 if (mounted) {
-                    setPrograms(items);
+                    setCategories(items);
                     setStartIndex(0);
                 }
             })
             .catch((error) => {
-                console.error("Error loading programs", error);
+                console.error("Error loading categories", error);
             });
 
         return () => {
@@ -152,76 +152,67 @@ export default function Category() {
         };
     }, []);
 
-    if (programs.length === 0) {
+    if (categories.length === 0) {
         return null;
     }
 
-    const canSlide = programs.length > visibleCount;
-    const visiblePrograms = canSlide
-        ? Array.from(
-            { length: visibleCount },
-            (_, index) => programs[(startIndex + index) % programs.length]
-        )
-        : programs;
+    const visibleCategories = Array.from(
+        { length: Math.min(visibleCount, categories.length) },
+        (_, index) => categories[(startIndex + index) % categories.length]
+    );
 
     const handlePrevious = () => {
         setStartIndex((currentIndex) => (
-            currentIndex === 0 ? programs.length - 1 : currentIndex - 1
+            currentIndex === 0 ? categories.length - 1 : currentIndex - 1
         ));
     };
 
     const handleNext = () => {
-        setStartIndex((currentIndex) => (currentIndex + 1) % programs.length);
+        setStartIndex((currentIndex) => (currentIndex + 1) % categories.length);
     };
 
     return (
         <div>
-            <br />
-            <br />
-            <section className="seccion contenedor">
+            <section className="seccion contenedor category-section">
                 <h2 className="photo-gallery__title">
-                    Soccer Schools, Camps and International Academies
+                    Categories
                 </h2>
-                <div className={`programs-carousel ${canSlide ? "" : "programs-carousel--static"}`.trim()}>
-                    {canSlide && (
-                        <button
-                            type="button"
-                            className="photo-gallery__control programs-carousel__control"
-                            aria-label="Previous programs"
-                            onClick={handlePrevious}
-                        >
-                            <i className="fa-solid fa-chevron-left"></i>
-                        </button>
-                    )}
+                <div className="programs-carousel">
+                    <button
+                        type="button"
+                        className="photo-gallery__control programs-carousel__control"
+                        aria-label="Previous categories"
+                        onClick={handlePrevious}
+                    >
+                        <i className="fa-solid fa-chevron-left"></i>
+                    </button>
                     <div className="contenedor-programas">
-                        {visiblePrograms.map((program, index) => (
-                            <div className="programa" key={program.id}>
+                        {visibleCategories.map((category, index) => (
+                            <div className="programa" key={category.id}>
                                 <picture>
-                                    <source srcSet={program.imageUrl} type="image/webp"></source>
-                                    <source srcSet={program.imageUrl} type="image/jpeg"></source>
-                                    <img loading="lazy" src={program.imageUrl} alt={program.title}></img>
+                                    <source srcSet={category.imageUrl} type="image/webp"></source>
+                                    <source srcSet={category.imageUrl} type="image/jpeg"></source>
+                                    <img loading="lazy" src={category.imageUrl} alt={category.title}></img>
                                 </picture>
                                 <div className={`contenido-programa ${index === 0 ? "especial" : ""}`.trim()}>
-                                    <h3>{program.title}</h3>
-                                    <p className="programa-descripcion">{program.description}</p>
+                                    <h3>{category.title}</h3>
+                                    <p className="programa-descripcion">{category.description}</p>
                                     <div className="botones">
-                                        <a href={program.canonicalUrl} className="boton-programa">learn more</a>
-                                        <a href={program.applyUrl} className="boton-programa-azul">Apply online</a>
+                                        <a href={category.canonicalUrl} className="boton-programa">learn more</a>
+                                        <a href={category.applyUrl} className="boton-programa-azul">Apply online</a>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    {canSlide && (
-                        <button
-                            type="button"
-                            className="photo-gallery__control programs-carousel__control"
-                            aria-label="Next programs"
-                            onClick={handleNext}
-                        >
-                            <i className="fa-solid fa-chevron-right"></i>
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        className="photo-gallery__control programs-carousel__control"
+                        aria-label="Next categories"
+                        onClick={handleNext}
+                    >
+                        <i className="fa-solid fa-chevron-right"></i>
+                    </button>
                 </div>
             </section>
         </div>

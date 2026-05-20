@@ -195,7 +195,7 @@ export default function Gallery() {
 
     return (
         <div>
-            <section className="seccion contenedor">
+            <section className="seccion contenedor media-gallery-section">
                 <div className="pphoto-gallery__title">
                     <div className="photo-gallery__header">
                         <h2 className="photo-gallery__title">Photo Gallery</h2>
@@ -241,6 +241,9 @@ export default function Gallery() {
                             </button>
                         )}
                     </div>
+                    <div className="boton-base">
+                        <a href="#" className="boton boton-news">More Photo Galleries</a>
+                    </div>
                     {isModalOpen && (
                     <div className="gallery-modal" onClick={closeModal}>
                         <div className="gallery-modal__content" onClick={(e) => e.stopPropagation()}>
@@ -269,7 +272,7 @@ export default function Gallery() {
                 )}
             </section>
 
-            <section className="imagen-photogallery">
+            <section className="imagen-photogallery seccion">
                 <a href="https://www.facebook.com/IFX.Soccer.Camps" target="_blank" className="boton-gallery"><i className="fa-brands fa-facebook"></i> Join Us On Facebook</a>
             </section>
         </div>

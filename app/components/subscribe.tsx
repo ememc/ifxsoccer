@@ -18,7 +18,7 @@ function NotificationIcon({ type }: { type: "error" | "success" }) {
 
 export default function Subscribe() {
     return (
-        <section className="subscribe-section">
+        <section className="subscribe-section seccion">
             <Script id="brevo-captcha-callback" strategy="afterInteractive">
                 {`
                     window.handleCaptchaResponse = function handleCaptchaResponse() {
