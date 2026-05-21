@@ -175,7 +175,7 @@ export default function Category() {
         <div>
             <section className="seccion contenedor category-section">
                 <h2 className="photo-gallery__title">
-                    Categories
+                    Soccer Training Programs in Europe
                 </h2>
                 <div className="programs-carousel">
                     <button

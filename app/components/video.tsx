@@ -151,6 +151,7 @@ export default function Video() {
     const [startIndex, setStartIndex] = useState(0);
     const visibleCount = useResponsiveCount({
         desktop: VISIBLE_VIDEOS,
+        tablet: VISIBLE_VIDEOS,
         mobile: 1,
     });
 

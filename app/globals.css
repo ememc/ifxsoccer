@@ -981,7 +981,7 @@ h4 {
 
 .nav__menu {
   background-color: #fff;
-  height: calc(100vh - 11rem);
+  height: calc(100vh - 6.5rem);
   left: 0;
   opacity: 0;
   overflow: auto;
@@ -1053,7 +1053,7 @@ h4 {
 .show-menu {
   opacity: 1;
   pointer-events: auto;
-  top: 8.5rem;
+  top: 0;
 }
 
 .show-icon .nav__toggle-menu {
@@ -1243,12 +1243,13 @@ li {
   }
 
   .nav__link {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     align-items: center;
     background-color: transparent !important;
     cursor: pointer;
     display: flex;
-    height: 5rem;
-    padding: 0 1.5rem;
+ 
   }
 
   .nav__link:hover {
@@ -1333,6 +1334,22 @@ li {
   }
 }
 
+@media (min-width: 1025px) and (max-width: 1105px) {
+  .nav__link {
+    font-size: 1.2rem;
+    padding: 0 1rem;
+    white-space: nowrap;
+  }
+
+  .dropdown__button {
+    column-gap: .35rem;
+  }
+
+  .dropdown__arrow {
+    font-size: 1.2rem;
+  }
+}
+
 @media (max-width: 1023px) {
   .nav {
     width: 95%;
@@ -1349,12 +1366,12 @@ li {
   .nav__menu {
     background-color: #fff;
     display: block;
-    height: calc(100vh - 11rem);
+    height: calc(100vh - 6.5rem);
     left: 0;
     opacity: 0;
     pointer-events: none;
     position: absolute;
-    top: 11rem;
+    top: .5rem;
     transition: top .4s, opacity .3s;
     width: 100%
   }
@@ -1366,7 +1383,7 @@ li {
   .show-menu {
     opacity: 1;
     pointer-events: auto;
-    top: 8.5rem;
+    top: 0;
   }
 
   .dropdown__list img {
@@ -2232,6 +2249,13 @@ h2 {
     font-size: 1.8rem;
     height: 4.4rem;
     width: 4.4rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .photo-gallery__grid {
+    gap: 3rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -3267,10 +3291,10 @@ h2 {
 .contenido-programa h3 {
   text-transform: uppercase;
   font-size: 2.1rem;
+  line-height: 1.2;
   text-align: left;
   color: #2f3878;
   margin-top: 1rem;
-  height: 5rem;
 }
 .contenido-programa p {
   color: #808080;
@@ -3290,9 +3314,7 @@ h2 {
 
 @media (max-width: 767px) {
   .contenido-programa h3 {
-    height: auto;
     margin-bottom: 1.8rem;
-    min-height: 5rem;
   }
 
   .contenido-programa .programa-descripcion {

@@ -123,6 +123,7 @@ export default function Gallery() {
     const [isPlaying, setIsPlaying] = useState(true);
     const visibleCount = useResponsiveCount({
         desktop: VISIBLE_IMAGES,
+        tablet: VISIBLE_IMAGES,
         mobile: 1,
     });
 

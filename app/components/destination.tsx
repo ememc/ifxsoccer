@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
 import api from "../services/api";
+import { useResponsiveCount } from "./use-responsive-count";
 
 type DestinationRecord = Record<string, unknown>;
 type DestinationCity = {
@@ -140,6 +141,11 @@ export default function Destination() {
     const [destinations, setDestinations] = useState<DestinationItem[]>([]);
     const [startIndex, setStartIndex] = useState(0);
     const [imageIndex, setImageIndex] = useState(0);
+    const visibleCount = useResponsiveCount({
+        desktop: DEFAULT_VISIBLE_DESTINATIONS,
+        tablet: DEFAULT_VISIBLE_DESTINATIONS,
+        mobile: 1,
+    });
 
     useEffect(() => {
         let mounted = true;
@@ -180,7 +186,7 @@ export default function Destination() {
     }
 
     const visibleDestinations = Array.from(
-        { length: Math.min(DEFAULT_VISIBLE_DESTINATIONS, destinations.length) },
+        { length: Math.min(visibleCount, destinations.length) },
         (_, index) => destinations[(startIndex + index) % destinations.length]
     );
 
