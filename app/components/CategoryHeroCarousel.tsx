@@ -3,6 +3,7 @@
 import type { KeyboardEvent } from "react";
 import { useState } from "react";
 import type { ProgramHero } from "../lib/programs";
+import { useHeroTitleOffset } from "./use-hero-title-offset";
 
 type CategoryHeroCarouselProps = {
   applyUrl: string;
@@ -36,6 +37,7 @@ export default function CategoryHeroCarousel({
   const visibleHeroes = getVisibleHeroes(heroes, fallbackTitle);
   const [activeIndex, setActiveIndex] = useState(0);
   const activeHero = visibleHeroes[activeIndex];
+  const { hasTallTitle, sectionRef } = useHeroTitleOffset();
 
   const handlePrevious = () => {
     setActiveIndex((currentIndex) =>
@@ -63,7 +65,8 @@ export default function CategoryHeroCarousel({
 
   return (
     <section
-      className="hero header-img"
+      className={`hero header-img ${hasTallTitle ? "header-img--title-three-lines" : ""}`.trim()}
+      ref={sectionRef}
       style={{ backgroundImage: `url(${activeHero.image_url})` }}
     >
       <div className="contenido-hero contenedor">

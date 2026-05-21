@@ -182,8 +182,7 @@ export default function Category() {
                         type="button"
                         className="photo-gallery__control programs-carousel__control"
                         aria-label="Previous categories"
-                        onClick={handlePrevious}
-                    >
+                        onClick={handlePrevious}>
                         <i className="fa-solid fa-chevron-left"></i>
                     </button>
                     <div className="contenedor-programas">
@@ -209,8 +208,7 @@ export default function Category() {
                         type="button"
                         className="photo-gallery__control programs-carousel__control"
                         aria-label="Next categories"
-                        onClick={handleNext}
-                    >
+                        onClick={handleNext}>
                         <i className="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>

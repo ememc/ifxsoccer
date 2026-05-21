@@ -143,7 +143,6 @@ export default function Destination() {
     const [imageIndex, setImageIndex] = useState(0);
     const visibleCount = useResponsiveCount({
         desktop: DEFAULT_VISIBLE_DESTINATIONS,
-        tablet: DEFAULT_VISIBLE_DESTINATIONS,
         mobile: 1,
     });
 
@@ -185,6 +184,7 @@ export default function Destination() {
         return null;
     }
 
+    const canNavigate = destinations.length > 1;
     const visibleDestinations = Array.from(
         { length: Math.min(visibleCount, destinations.length) },
         (_, index) => destinations[(startIndex + index) % destinations.length]
@@ -214,6 +214,7 @@ export default function Destination() {
                         type="button"
                         className="photo-gallery__control programs-carousel__control"
                         aria-label="Previous destinations"
+                        disabled={!canNavigate}
                         onClick={handlePrevious}
                     >
                         <i className="fa-solid fa-chevron-left" aria-hidden="true"></i>
@@ -250,6 +251,7 @@ export default function Destination() {
                         type="button"
                         className="photo-gallery__control programs-carousel__control"
                         aria-label="Next destinations"
+                        disabled={!canNavigate}
                         onClick={handleNext}
                     >
                         <i className="fa-solid fa-chevron-right" aria-hidden="true"></i>

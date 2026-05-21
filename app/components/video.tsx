@@ -174,11 +174,10 @@ export default function Video() {
         };
     }, []);
 
-    const canSlide = videoItems.length > 1;
-    const visibleVideos = Array.from(
-        { length: Math.min(visibleCount, videoItems.length) },
-        (_, index) => videoItems[(startIndex + index) % videoItems.length]
-    );
+    const canSlide = videoItems.length > visibleCount;
+    const visibleVideos = canSlide
+        ? Array.from({ length: visibleCount }, (_, index) => videoItems[(startIndex + index) % videoItems.length])
+        : videoItems;
 
     const handlePrevious = () => {
         setStartIndex((currentIndex) => (
@@ -191,10 +190,7 @@ export default function Video() {
     };
 
     const getEmbedUrl = (url: string): string => {
-        
         const youTubeId = getYouTubeVideoId(url);
-        
-        console.log(`https://www.youtube.com/embed/${youTubeId}`)
 
         return `https://www.youtube.com/embed/${youTubeId}`;
     };
@@ -212,11 +208,11 @@ export default function Video() {
                         <a href="#" className="photo-gallery__button">More Video Galleries</a>
                     </div>
                 </div>
-                <div className={`video-gallery__carousel programs-carousel ${canSlide ? "" : "programs-carousel--static"}`.trim()}>
+                <div className={`video-gallery__carousel ${canSlide ? "" : "video-gallery__carousel--static"}`.trim()}>
                         {canSlide && (
                             <button
                                 type="button"
-                                className="photo-gallery__control programs-carousel__control"
+                                className="video-gallery__control"
                                 aria-label="Previous videos"
                                 onClick={handlePrevious}
                             >
@@ -249,7 +245,7 @@ export default function Video() {
                         {canSlide && (
                             <button
                                 type="button"
-                                className="photo-gallery__control programs-carousel__control"
+                                className="video-gallery__control"
                                 aria-label="Next videos"
                                 onClick={handleNext}
                             >
