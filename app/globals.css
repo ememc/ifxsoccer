@@ -1053,7 +1053,7 @@ h4 {
 .show-menu {
   opacity: 1;
   pointer-events: auto;
-  top: 6.5rem;
+  top: .5rem;
 }
 
 .show-icon .nav__toggle-menu {
@@ -1371,7 +1371,7 @@ li {
     opacity: 0;
     pointer-events: none;
     position: absolute;
-    top: 6.5rem;
+    top: .5rem;
     transition: top .4s, opacity .3s;
     width: 100%
   }
@@ -1383,7 +1383,7 @@ li {
   .show-menu {
     opacity: 1;
     pointer-events: auto;
-    top: 6.5rem;
+    top: .5rem;
   }
 
   .dropdown__list img {
