@@ -1,4 +1,5 @@
 import { API_ENDPOINTS, API_URL_BASE } from "../config/api";
+import programsSnapshot from "../data/programs.json";
 
 export type ProgramHero = {
   image_text?: string;
@@ -75,6 +76,7 @@ type ProgramApiResponse =
     };
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://ifxsoccer.com").replace(/\/$/, "");
+let hasLoggedProgramFallback = false;
 
 export const slugifyProgramTitle = (value: string) =>
   value
@@ -153,19 +155,31 @@ const parseProgramResponse = (payload: ProgramApiResponse): Program[] => {
 };
 
 export const getPrograms = async () => {
-  const response = await fetch(`${API_URL_BASE}${API_ENDPOINTS.programs}`, {
-    next: { revalidate: 300 },
-  });
+  try {
+    const response = await fetch(`${API_URL_BASE}${API_ENDPOINTS.programs}`, {
+      next: { revalidate: 300 },
+    });
 
-  if (!response.ok) {
-    throw new Error(`Unable to load programs: ${response.status}`);
+    if (!response.ok) {
+      console.warn(`Unable to load programs: ${response.status}`);
+      return [];
+    }
+
+    const payload = (await response.json()) as ProgramApiResponse;
+
+    return parseProgramResponse(payload).filter(
+      (program) => program.program_enabled !== false && Boolean(program.program_title)
+    );
+  } catch (error) {
+    if (!hasLoggedProgramFallback) {
+      console.warn("Unable to load programs during static generation, using local snapshot", error);
+      hasLoggedProgramFallback = true;
+    }
+
+    return (programsSnapshot as Program[]).filter(
+      (program) => program.program_enabled !== false && Boolean(program.program_title)
+    );
   }
-
-  const payload = (await response.json()) as ProgramApiResponse;
-
-  return parseProgramResponse(payload).filter(
-    (program) => program.program_enabled !== false && Boolean(program.program_title)
-  );
 };
 
 export const getProgramBySlug = async (slug: string) => {

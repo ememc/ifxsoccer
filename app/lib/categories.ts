@@ -1,4 +1,5 @@
 import { API_ENDPOINTS, API_URL_BASE } from "../config/api";
+import categoriesSnapshot from "../data/categories.json";
 import {
   slugifyProgramTitle,
   type Program,
@@ -42,6 +43,7 @@ type CategoryApiResponse =
     };
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://ifxsoccer.com").replace(/\/$/, "");
+let hasLoggedCategoryFallback = false;
 
 const trimSlashes = (value: string) => value.replace(/^\/+|\/+$/g, "");
 
@@ -113,19 +115,31 @@ const parseCategoryResponse = (payload: CategoryApiResponse): Category[] => {
 };
 
 export const getCategories = async () => {
-  const response = await fetch(`${API_URL_BASE}${API_ENDPOINTS.category}`, {
-    next: { revalidate: 300 },
-  });
+  try {
+    const response = await fetch(`${API_URL_BASE}${API_ENDPOINTS.category}`, {
+      next: { revalidate: 300 },
+    });
 
-  if (!response.ok) {
-    throw new Error(`Unable to load categories: ${response.status}`);
+    if (!response.ok) {
+      console.warn(`Unable to load categories: ${response.status}`);
+      return [];
+    }
+
+    const payload = (await response.json()) as CategoryApiResponse;
+
+    return parseCategoryResponse(payload).filter(
+      (category) => category.category_enabled !== false && Boolean(category.category_title)
+    );
+  } catch (error) {
+    if (!hasLoggedCategoryFallback) {
+      console.warn("Unable to load categories during static generation, using local snapshot", error);
+      hasLoggedCategoryFallback = true;
+    }
+
+    return (categoriesSnapshot as Category[]).filter(
+      (category) => category.category_enabled !== false && Boolean(category.category_title)
+    );
   }
-
-  const payload = (await response.json()) as CategoryApiResponse;
-
-  return parseCategoryResponse(payload).filter(
-    (category) => category.category_enabled !== false && Boolean(category.category_title)
-  );
 };
 
 export const getCategoryBySlug = async (slug: string) => {

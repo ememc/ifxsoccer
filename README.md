@@ -27,10 +27,13 @@ Setup:
 Commands:
 
 ```bash
+npm run sync:content
 npm run sync:instagram
 npm run build
 npm run deploy
 ```
+
+`npm run sync:content` refreshes the local `programs` and `categories` JSON snapshots used as a fallback during static export when the remote API is unavailable at build time.
 
 What the sync does:
 

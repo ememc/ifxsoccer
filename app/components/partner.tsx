@@ -4,7 +4,9 @@ export default function Partner() {
     return (
         <section id="galeria" className="seccion contenedor">
             <h2 className="photo-gallery__title">Our Global Partners</h2>
-            <p>We collaborate with leading football academies and clubs worldwide.</p>
+            <br/>
+            <br/>
+            <p className="contenido-programa">We collaborate with leading football academies and clubs worldwide.</p>
             <div className="galeria-imagenes">
                 {partnerImages.map((imageNumber) => (
                     <img
