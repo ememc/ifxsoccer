@@ -18,6 +18,7 @@ type HeroApiResponse =
     | {
         body?: string | HeroApiResponse;
         hero?: HeroData[];
+        heroes?: HeroData[];
         heros?: HeroData[];
         items?: HeroData[];
     };
@@ -44,7 +45,7 @@ const parseHeroResponse = (payload: HeroApiResponse): HeroData[] => {
         return parseHeroResponse(payload.body);
     }
 
-    return payload.hero ?? payload.heros ?? payload.items ?? [];
+    return payload.hero ?? payload.heroes ?? payload.heros ?? payload.items ?? [];
 };
 
 const hasButtonLabel = (buttonLabel: string) => {

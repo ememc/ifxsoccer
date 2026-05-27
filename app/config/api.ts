@@ -2,7 +2,7 @@ export const API_URL_BASE =
     process.env.NEXT_PUBLIC_API_URL_BASE || "https://api.ifxsoccer.com";
 
 export const API_ENDPOINTS = {
-    heros: "/heros/",
+    heros: "/v1/heros/",
     herosFallback: "/v1/heros/",
     category: "/v1/category",
     images: "/v1/images/",

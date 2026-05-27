@@ -151,8 +151,10 @@ export default function Video() {
     const [startIndex, setStartIndex] = useState(0);
     const visibleCount = useResponsiveCount({
         desktop: VISIBLE_VIDEOS,
-        tablet: VISIBLE_VIDEOS,
+        tablet: 1,
         mobile: 1,
+        tabletBreakpoint: 768,
+        desktopBreakpoint: 1021,
     });
 
     useEffect(() => {
@@ -177,7 +179,7 @@ export default function Video() {
     const canSlide = videoItems.length > visibleCount;
     const visibleVideos = canSlide
         ? Array.from({ length: visibleCount }, (_, index) => videoItems[(startIndex + index) % videoItems.length])
-        : videoItems;
+        : videoItems.slice(0, visibleCount);
 
     const handlePrevious = () => {
         setStartIndex((currentIndex) => (
@@ -209,50 +211,49 @@ export default function Video() {
                     </div>
                 </div>
                 <div className={`video-gallery__carousel ${canSlide ? "" : "video-gallery__carousel--static"}`.trim()}>
-                        {canSlide && (
-                            <button
-                                type="button"
-                                className="video-gallery__control"
-                                aria-label="Previous videos"
-                                onClick={handlePrevious}
-                            >
-                                <i className="fa-solid fa-chevron-left"></i>
-                            </button>
-                        )}
-                        <div className="video-gallery__grid">
-                            {visibleVideos.map((item) => (
-                                <div className="video-gallery__item" key={item.id}>
-                                    <div className="video-item">
-                                        <div className="video-iframe-wrapper">
-                                            <iframe
-                                                width="560"
-                                                height="315"
-                                                src={getEmbedUrl(item.video_url)}
-                                                title={item.title}
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen></iframe>
+                    {canSlide && (
+                        <button
+                            type="button"
+                            className="video-gallery__control"
+                            aria-label="Previous videos"
+                            onClick={handlePrevious}
+                        >
+                            <i className="fa-solid fa-chevron-left"></i>
+                        </button>
+                    )}
+                    <div className={`video-gallery__grid ${visibleCount === 1 ? "media-gallery__grid--single" : ""}`.trim()}>
+                        {visibleVideos.map((item) => (
+                            <div className="video-gallery__item" key={item.id}>
+                                <div className="video-item">
+                                    <div className="video-iframe-wrapper">
+                                        <iframe
+                                            width="560"
+                                            height="315"
+                                            src={getEmbedUrl(item.video_url)}
+                                            title={item.title}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen></iframe>
+                                    </div>
+                                    {item.title && (
+                                        <div className="video-gallery__caption">
+                                            <p>{item.title}</p>
                                         </div>
-                                        {item.title && (
-                                            <div className="video-gallery__caption">
-                                                <p>{item.title}</p>
-                                            </div>
-                                        )}
-                                    </div>    
+                                    )}
                                 </div>
-                            ))}
-                        </div>
-
-                        {canSlide && (
-                            <button
-                                type="button"
-                                className="video-gallery__control"
-                                aria-label="Next videos"
-                                onClick={handleNext}
-                            >
-                                <i className="fa-solid fa-chevron-right"></i>
-                            </button>
-                        )}
+                            </div>
+                        ))}
                     </div>
+                    {canSlide && (
+                        <button
+                            type="button"
+                            className="video-gallery__control"
+                            aria-label="Next videos"
+                            onClick={handleNext}
+                        >
+                            <i className="fa-solid fa-chevron-right"></i>
+                        </button>
+                    )}
+                </div>
                 <div className="boton-base">
                     <a href="#" className="boton boton-news">More Video Galleries</a>
                 </div>

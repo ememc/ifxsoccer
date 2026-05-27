@@ -123,8 +123,10 @@ export default function Gallery() {
     const [isPlaying, setIsPlaying] = useState(true);
     const visibleCount = useResponsiveCount({
         desktop: VISIBLE_IMAGES,
-        tablet: VISIBLE_IMAGES,
+        tablet: 1,
         mobile: 1,
+        tabletBreakpoint: 768,
+        desktopBreakpoint: 1021,
     });
 
     useEffect(() => {
@@ -149,7 +151,7 @@ export default function Gallery() {
     const canSlide = galleryItems.length > visibleCount;
     const visibleImages = canSlide
         ? Array.from({ length: visibleCount }, (_, index) => galleryItems[(startIndex + index) % galleryItems.length])
-        : galleryItems;
+        : galleryItems.slice(0, visibleCount);
 
     const handlePrevious = () => {
         setStartIndex((currentIndex) => (
@@ -203,45 +205,43 @@ export default function Gallery() {
                         <a href="#" className="photo-gallery__button">More Photo Galleries</a>
                     </div>
                 </div>
-                <div className={`photo-gallery__carousel ${canSlide ? "" : "photo-gallery__carousel--static"}`}>
-                        {canSlide && (
+                <div className={`photo-gallery__carousel ${canSlide ? "" : "photo-gallery__carousel--static"}`.trim()}>
+                    {canSlide && (
+                        <button
+                            type="button"
+                            className="photo-gallery__control photo-gallery__control--prev"
+                            aria-label="Previous gallery images"
+                            onClick={handlePrevious}
+                        >
+                            <i className="fa-solid fa-chevron-left"></i>
+                        </button>
+                    )}
+                    <div className={`photo-gallery__grid ${visibleCount === 1 ? "media-gallery__grid--single" : ""}`.trim()}>
+                        {visibleImages.map((item, index) => (
                             <button
                                 type="button"
-                                className="photo-gallery__control photo-gallery__control--prev"
-                                aria-label="Previous gallery images"
-                                onClick={handlePrevious}
+                                className="photo-gallery__item"
+                                key={item.id}
+                                onClick={() => openModal((startIndex + index) % galleryItems.length)}
                             >
-                                <i className="fa-solid fa-chevron-left"></i>
+                                <img src={item.image} alt={item.title} loading="lazy" />
+                                <div className="photo-caption">
+                                    <p>{item.title}</p>
+                                </div>
                             </button>
-                        )}
-
-                        <div className="photo-gallery__grid">
-                            {visibleImages.map((item, index) => (
-                                <button
-                                    type="button"
-                                    className="photo-gallery__item"
-                                    key={item.id}
-                                    onClick={() => openModal((startIndex + index) % galleryItems.length)}
-                                >
-                                    <img src={item.image} alt={item.title} loading="lazy" />
-                                    <div className="photo-caption">
-                                        <p>{item.title}</p>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-
-                        {canSlide && (
-                            <button
-                                type="button"
-                                className="photo-gallery__control photo-gallery__control--next"
-                                aria-label="Next gallery images"
-                                onClick={handleNext}
-                            >
-                                <i className="fa-solid fa-chevron-right"></i>
-                            </button>
-                        )}
+                        ))}
                     </div>
+                    {canSlide && (
+                        <button
+                            type="button"
+                            className="photo-gallery__control photo-gallery__control--next"
+                            aria-label="Next gallery images"
+                            onClick={handleNext}
+                        >
+                            <i className="fa-solid fa-chevron-right"></i>
+                        </button>
+                    )}
+                </div>
                     <div className="boton-base">
                         <a href="#" className="boton boton-news">More Photo Galleries</a>
                     </div>
