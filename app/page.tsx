@@ -6,6 +6,7 @@ import Subscribe from "./components/subscribe";
 import Video from "./components/video";
 import Gallery from "./components/gallery";
 import Destination from "./components/destination";
+import CategorySection from "./components/categorySection";
 import Partner from "./components/partner";
 import Instagram from "./components/instagram";
 
@@ -21,6 +22,7 @@ export default function Page() {
       <Video />
       <Gallery />
       <Destination />
+      <CategorySection />
       <Partner />
     </>
   );

@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
+import { getCategoryPath, type Category } from "../lib/categories";
 import { getProgramPath, type Program } from "../lib/programs";
 import api from "../services/api";
 import { useResponsiveCount } from "./use-responsive-count";
 
-type ProgramRecord = Record<string, unknown>;
+type ApiRecord = Record<string, unknown>;
 
 type ProgramItem = {
     id: string;
@@ -17,13 +18,19 @@ type ProgramItem = {
     imageUrl: string;
 };
 
+type CategorySectionData = {
+    programs: ProgramItem[];
+    title: string;
+    viewMoreUrl: string;
+};
+
 const FALLBACK_PROGRAM_IMAGE = "https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg";
 
-const isRecord = (value: unknown): value is ProgramRecord => (
+const isRecord = (value: unknown): value is ApiRecord => (
     typeof value === "object" && value !== null && !Array.isArray(value)
 );
 
-const getStringValue = (record: ProgramRecord, keys: string[]) => {
+const getStringValue = (record: ApiRecord, keys: string[]) => {
     for (const key of keys) {
         const value = record[key];
 
@@ -35,7 +42,17 @@ const getStringValue = (record: ProgramRecord, keys: string[]) => {
     return "";
 };
 
-const getProgramHeroImage = (item: ProgramRecord) => {
+const isTrueValue = (value: unknown) => (
+    value === true || (typeof value === "string" && value.trim().toLowerCase() === "true")
+);
+
+const hasProgramIds = (value: unknown) => {
+    const programIds = new Map<string, number>();
+    addProgramIdsFromValue(value, programIds);
+    return programIds.size > 0;
+};
+
+const getProgramHeroImage = (item: ApiRecord) => {
     const heroCollection = item.program_hero;
 
     if (!Array.isArray(heroCollection)) {
@@ -57,7 +74,7 @@ const getProgramHeroImage = (item: ProgramRecord) => {
     return "";
 };
 
-const parseProgramsResponse = (payload: unknown): ProgramRecord[] => {
+const parseCollectionResponse = (payload: unknown, collectionKeys: string[]): ApiRecord[] => {
     if (Array.isArray(payload)) {
         return payload.filter(isRecord);
     }
@@ -68,21 +85,18 @@ const parseProgramsResponse = (payload: unknown): ProgramRecord[] => {
 
     if (typeof payload.body === "string") {
         try {
-            return parseProgramsResponse(JSON.parse(payload.body));
+            return parseCollectionResponse(JSON.parse(payload.body), collectionKeys);
         } catch {
             return [];
         }
     }
 
     if (payload.body) {
-        return parseProgramsResponse(payload.body);
+        return parseCollectionResponse(payload.body, collectionKeys);
     }
 
-    const collectionKeys = ["programs", "program", "items", "data", "results"];
-
     for (const key of collectionKeys) {
-        const collection = payload[key];
-        const parsedCollection = parseProgramsResponse(collection);
+        const parsedCollection = parseCollectionResponse(payload[key], collectionKeys);
 
         if (parsedCollection.length > 0) {
             return parsedCollection;
@@ -92,7 +106,7 @@ const parseProgramsResponse = (payload: unknown): ProgramRecord[] => {
     return [];
 };
 
-const normalizeProgramItem = (item: ProgramRecord, index: number): ProgramItem | null => {
+const normalizeProgramItem = (item: ApiRecord, index: number): ProgramItem | null => {
     const title = getStringValue(item, ["program_title", "title", "name"]);
 
     if (!title) {
@@ -115,17 +129,114 @@ const normalizeProgramItem = (item: ProgramRecord, index: number): ProgramItem |
     };
 };
 
-const getPrograms = async (): Promise<ProgramItem[]> => {
-    const response = await api.get<unknown>(API_ENDPOINTS.programs);
+const addProgramIdsFromValue = (value: unknown, programIds: Map<string, number>, order = programIds.size) => {
+    if (typeof value === "string" && value.trim().length > 0) {
+        programIds.set(value.trim(), order);
+        return;
+    }
 
-    return parseProgramsResponse(response.data)
-        .filter((item) => item.program_enabled !== false && item.enabled !== false)
-        .map(normalizeProgramItem)
-        .filter((item): item is ProgramItem => item !== null);
+    if (Array.isArray(value)) {
+        value.forEach((item, index) => addProgramIdsFromValue(item, programIds, index));
+        return;
+    }
+
+    if (!isRecord(value)) {
+        return;
+    }
+
+    const programId = getStringValue(value, ["program_id", "id", "_id", "value"]);
+    const programOrder = Number.parseInt(getStringValue(value, ["program_order", "order"]), 10);
+    const resolvedOrder = Number.isNaN(programOrder) ? order : programOrder;
+
+    if (programId) {
+        programIds.set(programId, resolvedOrder);
+    }
+
+    addProgramIdsFromValue(value.program, programIds, resolvedOrder);
+    addProgramIdsFromValue(value.program_id, programIds, resolvedOrder);
 };
 
-export default function Program() {
+const getSectionCategories = (categories: ApiRecord[]) => {
+    const enabledCategories = categories.filter((category) => isTrueValue(category.category_enabled));
+    const sectionCategories = enabledCategories.filter((category) => isTrueValue(category.category_section));
+
+    if (sectionCategories.length > 0) {
+        return sectionCategories;
+    }
+
+    return enabledCategories.filter((category) => hasProgramIds(category.category_programs));
+};
+
+const getSectionCategoryProgramIds = (categories: ApiRecord[]) => {
+    const programIds = new Map<string, number>();
+
+    categories.forEach((category) => {
+        addProgramIdsFromValue(category.category_programs, programIds);
+    });
+
+    return programIds;
+};
+
+const getSectionCategoryPath = (category: ApiRecord | undefined) => {
+    if (!category) {
+        return "#";
+    }
+
+    const title = getStringValue(category, ["category_title", "title", "name"]);
+
+    if (!title) {
+        return "#";
+    }
+
+    return getCategoryPath({
+        ...category,
+        category_id: getStringValue(category, ["category_id", "id"]) || title,
+        category_title: title,
+    } as Category);
+};
+
+const getCategorySectionData = async (): Promise<CategorySectionData> => {
+    const [categoriesResponse, programsResponse] = await Promise.all([
+        api.get<unknown>(API_ENDPOINTS.category),
+        api.get<unknown>(API_ENDPOINTS.programs),
+    ]);
+    const categories = parseCollectionResponse(categoriesResponse.data, ["category", "categories", "items", "data", "results"]);
+    const programs = parseCollectionResponse(programsResponse.data, ["programs", "program", "items", "data", "results"]);
+    const sectionCategories = getSectionCategories(categories);
+    const categoryProgramIds = getSectionCategoryProgramIds(sectionCategories);
+    const selectedCategory = sectionCategories[0];
+    const title = getStringValue(selectedCategory ?? {}, ["category_title", "title", "name"]) || "Programs";
+    const viewMoreUrl = getSectionCategoryPath(selectedCategory);
+
+    if (categoryProgramIds.size === 0) {
+        return {
+            programs: [],
+            title,
+            viewMoreUrl,
+        };
+    }
+
+    const sectionPrograms = programs
+        .filter((program) => program.program_enabled !== false && program.enabled !== false)
+        .filter((program) => categoryProgramIds.has(getStringValue(program, ["program_id", "id", "_id"])))
+        .sort((firstProgram, secondProgram) => (
+            (categoryProgramIds.get(getStringValue(firstProgram, ["program_id", "id", "_id"])) ?? 0) -
+            (categoryProgramIds.get(getStringValue(secondProgram, ["program_id", "id", "_id"])) ?? 0)
+        ))
+        .map(normalizeProgramItem)
+        .filter((program): program is ProgramItem => program !== null);
+
+    return {
+        programs: sectionPrograms,
+        title,
+        viewMoreUrl,
+    };
+};
+
+export default function CategorySection() {
     const [programs, setPrograms] = useState<ProgramItem[]>([]);
+    const [sectionTitle, setSectionTitle] = useState("Programs");
+    const [viewMoreUrl, setViewMoreUrl] = useState("#");
     const [startIndex, setStartIndex] = useState(0);
     const visibleCount = useResponsiveCount({
         desktop: 3,
@@ -136,15 +247,17 @@ export default function Program() {
     useEffect(() => {
         let mounted = true;
 
-        getPrograms()
-            .then((items) => {
+        getCategorySectionData()
+            .then(({ programs: items, title, viewMoreUrl: categoryUrl }) => {
                 if (mounted) {
                     setPrograms(items);
+                    setSectionTitle(title);
+                    setViewMoreUrl(categoryUrl);
                     setStartIndex(0);
                 }
             })
             .catch((error) => {
-                console.error("Error loading programs", error);
+                console.error("Error loading category section programs", error);
             });
 
         return () => {
@@ -156,10 +269,11 @@ export default function Program() {
         return null;
     }
 
-    const canSlide = programs.length > visibleCount;
+    const canSlide = programs.length > 1;
+    const visibleSlots = Math.min(visibleCount, programs.length);
     const visiblePrograms = canSlide
         ? Array.from(
-            { length: visibleCount },
+            { length: visibleSlots },
             (_, index) => programs[(startIndex + index) % programs.length]
         )
         : programs;
@@ -178,14 +292,14 @@ export default function Program() {
         <div>
             <section className="seccion contenedor">
                 <h2 className="photo-gallery__title">
-                    Soccer Schools, Camps and International Academies
+                    {sectionTitle}
                 </h2>
                 <div className={`programs-carousel ${canSlide ? "" : "programs-carousel--static"} ${visiblePrograms.length === 1 ? "programs-carousel--single" : ""}`.trim()}>
                     {canSlide && (
                         <button
                             type="button"
                             className="photo-gallery__control programs-carousel__control"
-                            aria-label="Previous programs"
+                            aria-label="Previous category section programs"
                             onClick={handlePrevious}
                         >
                             <i className="fa-solid fa-chevron-left"></i>
@@ -214,12 +328,15 @@ export default function Program() {
                         <button
                             type="button"
                             className="photo-gallery__control programs-carousel__control"
-                            aria-label="Next programs"
+                            aria-label="Next category section programs"
                             onClick={handleNext}
                         >
                             <i className="fa-solid fa-chevron-right"></i>
                         </button>
                     )}
+                </div>
+                <div className="category-section__actions">
+                    <a href={viewMoreUrl} className="boton-programa category-section__view-more">view more programs</a>
                 </div>
             </section>
         </div>

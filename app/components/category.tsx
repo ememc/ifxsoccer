@@ -35,6 +35,12 @@ const getStringValue = (record: CategoryRecord, keys: string[]) => {
     return "";
 };
 
+const shouldShowCategory = (item: CategoryRecord) => (
+    item.category_enabled === true &&
+    item.category_section === false &&
+    Boolean(getCategoryHeroImage(item) || getStringValue(item, ["category_image", "image"]))
+);
+
 const getCategoryHeroImage = (item: CategoryRecord) => {
     const heroCollection = item.category_hero ?? item.program_hero;
 
@@ -111,7 +117,7 @@ const normalizeCategoryItem = (item: CategoryRecord, index: number): CategoryIte
         description: getStringValue(item, ["category_description", "description"]),
         applyUrl: getStringValue(item, ["category_apply", "apply_url", "apply", "link"]) || "https://ifxsoccer.com/apply",
         canonicalUrl: getCategoryPath(category),
-        imageUrl: getCategoryHeroImage(item) || FALLBACK_CATEGORY_IMAGE,
+        imageUrl: getCategoryHeroImage(item) || getStringValue(item, ["category_image", "image"]) || FALLBACK_CATEGORY_IMAGE,
     };
 };
 
@@ -119,7 +125,7 @@ const getCategories = async (): Promise<CategoryItem[]> => {
     const response = await api.get<unknown>(API_ENDPOINTS.category);
 
     return parseCategoriesResponse(response.data)
-        .filter((item) => item.category_enabled !== false && item.enabled !== false)
+        .filter(shouldShowCategory)
         .map(normalizeCategoryItem)
         .filter((item): item is CategoryItem => item !== null);
 };
@@ -177,7 +183,7 @@ export default function Category() {
                 <h2 className="photo-gallery__title">
                     Soccer Training Programs in Europe
                 </h2>
-                <div className="programs-carousel">
+                <div className={`programs-carousel ${visibleCategories.length === 1 ? "programs-carousel--single" : ""}`.trim()}>
                     <button
                         type="button"
                         className="photo-gallery__control programs-carousel__control"

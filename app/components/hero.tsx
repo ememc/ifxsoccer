@@ -113,7 +113,7 @@ export default function Hero() {
                         <React.Fragment key={item.hero_id}>
                             <div className={`carousel-item ${index === 0 ? 'active' : ''}`} >
                                 <img src={item.hero_image} className="d-block w-100" alt={item.hero_title} style={{ objectFit: 'cover' }} />
-                                <div className="carousel-caption d-none d-md-block">
+                                <div className="carousel-caption">
                                     <p>{item.hero_title}</p>
                                     {hasButtonLabel(item.hero_button) && (
                                         <a className="boton-hero" href={item.hero_call || "#"}>{item.hero_button}</a>
