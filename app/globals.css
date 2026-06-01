@@ -982,14 +982,14 @@ h4 {
 
 .nav__menu {
   background-color: #fff;
-  height: calc(100vh - 8.3rem);
+  height: calc(100vh - 7.8rem);
   left: 0;
   opacity: 0;
   overflow: auto;
   padding-block: 1.5rem 4rem;
   pointer-events: none;
   position: absolute;
-  top: 0;
+  top: -.5rem;
   transition: top .4s, opacity .3s;
   width: 100%
 }
@@ -1054,7 +1054,7 @@ h4 {
 .show-menu {
   opacity: 1;
   pointer-events: auto;
-  top: .5rem;
+  top: -.5rem;
 }
 
 .show-icon .nav__toggle-menu {
@@ -1239,18 +1239,19 @@ li {
   .nav__menu li {
     align-items: center;
     display: flex;
+    height: 100%;
     list-style: none;
     position: static;
   }
 
   .nav__link {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
     align-items: center;
     background-color: transparent !important;
     cursor: pointer;
     display: flex;
- 
+    height: 100%;
+    margin: 0;
+    padding: 0 1.5rem;
   }
 
   .nav__link:hover {
@@ -1268,7 +1269,7 @@ li {
     display: none;
     height: auto !important;
     left: 50%;
-    margin-top: 0;
+    margin-top: .5rem;
     max-width: 1200px;
     overflow: visible !important;
     padding: 2rem;
@@ -1367,12 +1368,12 @@ li {
   .nav__menu {
     background-color: #fff;
     display: block;
-    height: calc(100vh - 8.3rem);
+    height: calc(100vh - 7.8rem);
     left: 0;
     opacity: 0;
     pointer-events: none;
     position: absolute;
-    top: .5rem;
+    top: -.5rem;
     transition: top .4s, opacity .3s;
     width: 100%
   }
@@ -1384,7 +1385,7 @@ li {
   .show-menu {
     opacity: 1;
     pointer-events: auto;
-    top: .5rem;
+    top: -.5rem;
   }
 
   .dropdown__list img {
