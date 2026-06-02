@@ -416,7 +416,7 @@ h4 {
 }
 
 .sec-aboutus .sociales li a:hover {
-  background-color: #0ff;
+  background-color: #FFFFFF;
 }
 
 .sec-aboutus .sociales li a i {
@@ -3132,30 +3132,28 @@ h2 {
   }
 
   .carousel-caption {
-    background: #fff;
-    bottom: auto;
-    color: #2f3878;
-    left: auto;
-    padding: 1.4rem 2rem 2rem;
-    position: static;
+    bottom: 3rem;
+    left: 50%;
+    padding: 0 2rem;
     right: auto;
     top: auto;
-    transform: none;
+    transform: translateX(-50%);
+    width: min(100%, 34rem);
   }
 
   .carousel-caption p {
-    background-color: transparent;
-    color: #2f3878;
-    font-size: 1.6rem;
-    line-height: 1.35;
+    background-color: rgba(0, 0, 0, .55);
+    color: #fff;
+    font-size: 1.45rem;
+    line-height: 1.3;
     margin: 0 auto 1.2rem;
-    padding: 0;
+    padding: 1.2rem 1rem;
   }
 
   .carousel-caption .boton-hero {
-    font-size: 1.2rem;
-    padding: 0.8rem 2rem;
-    width: min(24rem, 80%);
+    font-size: 1.1rem;
+    padding: 0.9rem 1.6rem;
+    width: min(20rem, 100%);
   }
 
   .hero-carousel__control,
@@ -3178,6 +3176,23 @@ h2 {
   text-transform: uppercase;
   width: 30%;
   margin: 0 auto;
+}
+
+@media (max-width: 480px) {
+  .carousel-caption {
+    bottom: 2rem;
+    width: min(100%, 30rem);
+  }
+
+  .carousel-caption p {
+    font-size: 1.3rem;
+    padding: 1rem .9rem;
+  }
+
+  .carousel-caption .boton-hero {
+    font-size: 1rem;
+    width: min(18rem, 100%);
+  }
 }
 
 
@@ -3415,38 +3430,52 @@ h2 {
   margin-top: 4rem;
 }
 
+.tabla-programa
+{
+  width: 100%;
+  background-color: #FFFFFF;
+}
+
+.celda-programa
+{
+  width: 50%;
+  background-color: #FFFFFF;
+}
 
 .boton-programa {
-  /* Use background so gradients are supported as well as plain colors */
+
   background: #FFFFFF;
   color: #FFFFFF;
   text-transform: uppercase;
-  font-weight: 300;
+  font-weight: 100;
   text-decoration: none;
   padding: 1rem 3rem;
   text-align: center;
   margin-top: 2rem;
   display: inline-block;
   border-radius: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
 }
+
 .boton-programa:hover {
   background-color: #786f2f;
   color: #FFFFFF;
 }
+
 .boton-programa {
   color: #786f2f;
   padding: 1.3rem 1.3rem;
   position: relative;
 }
+
 .boton-programa:hover {
-  background-color: #FFFFFF;
-  color: #2f3878;
+  background-color: #786f2f;
+  color: #FFFFFF;
   text-decoration: underline;
 }
 
 .boton-programa-azul {
-  /* Use background so gradients are supported as well as plain colors */
+
   background: #2f3878;
   color: #FFFFFF;
   text-transform: uppercase;
@@ -3457,6 +3486,7 @@ h2 {
   margin-top: 1rem;
   display: inline-block;
   border-radius: 0.5rem;
+  font-size: 1.4rem;
 }
 .boton-programa-azul:hover {
   background-color: #786f2f;
@@ -3464,7 +3494,7 @@ h2 {
 }
 .boton-programa-azul {
   color: #FFFFFF;
-  padding: 0.3rem 3rem;
+  padding: 1.3rem 1.3rem;
 }
 .boton-programa-azul:hover {
   background-color: #786f2f;
@@ -3501,7 +3531,14 @@ h2 {
 }
 
 .programs-carousel .botones {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin: auto auto 0;
+  max-width: 36rem;
   margin-top: auto;
+  width: 100%;
 }
 
 .programs-carousel__control {
@@ -3611,11 +3648,7 @@ h2 {
   }
 
   .programs-carousel .botones {
-    align-items: center;
-    display: flex;
     flex-direction: row;
-    gap: 1rem;
-    width: 100%;
   }
 
   .programs-carousel .boton-programa,
@@ -3628,7 +3661,9 @@ h2 {
   }
 
   .programs-carousel--single .botones {
+    justify-content: center;
     flex-direction: column;
+    max-width: 24rem;
   }
 
   .programs-carousel--single .boton-programa,
@@ -3642,6 +3677,40 @@ h2 {
     font-size: 1.5rem;
     height: 3.8rem;
     width: 3.8rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .programs-carousel .botones {
+    flex-direction: column;
+    justify-content: center;
+    max-width: 24rem;
+  }
+
+  .programs-carousel .tabla-programa,
+  .programs-carousel .tabla-programa tbody,
+  .programs-carousel .tabla-programa tr,
+  .programs-carousel .tabla-programa td {
+    display: block;
+    width: 100%;
+    background-color: #ffffff;
+  }
+
+  .programs-carousel .tabla-programa tr {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .programs-carousel .celda-programa {
+    padding: 0;
+    text-align: center;
+  }
+
+  .programs-carousel .boton-programa,
+  .programs-carousel .boton-programa-azul {
+    flex: none;
+    width: 100%;
   }
 }
 

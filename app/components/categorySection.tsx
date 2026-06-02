@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config/api";
-import { getCategoryPath, type Category } from "../lib/categories";
 import { getProgramPath, type Program } from "../lib/programs";
 import api from "../services/api";
 import { useResponsiveCount } from "./use-responsive-count";
@@ -20,8 +19,8 @@ type ProgramItem = {
 
 type CategorySectionData = {
     programs: ProgramItem[];
+    totalPrograms: number;
     title: string;
-    viewMoreUrl: string;
 };
 
 const FALLBACK_PROGRAM_IMAGE = "https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg";
@@ -177,25 +176,7 @@ const getSectionCategoryProgramIds = (categories: ApiRecord[]) => {
     return programIds;
 };
 
-const getSectionCategoryPath = (category: ApiRecord | undefined) => {
-    if (!category) {
-        return "#";
-    }
-
-    const title = getStringValue(category, ["category_title", "title", "name"]);
-
-    if (!title) {
-        return "#";
-    }
-
-    return getCategoryPath({
-        ...category,
-        category_id: getStringValue(category, ["category_id", "id"]) || title,
-        category_title: title,
-    } as Category);
-};
-
-const getCategorySectionData = async (): Promise<CategorySectionData> => {
+const getCategorySectionData = async (previewOnly = false): Promise<CategorySectionData> => {
     const [categoriesResponse, programsResponse] = await Promise.all([
         api.get<unknown>(API_ENDPOINTS.category),
         api.get<unknown>(API_ENDPOINTS.programs),
@@ -206,13 +187,11 @@ const getCategorySectionData = async (): Promise<CategorySectionData> => {
     const categoryProgramIds = getSectionCategoryProgramIds(sectionCategories);
     const selectedCategory = sectionCategories[0];
     const title = getStringValue(selectedCategory ?? {}, ["category_title", "title", "name"]) || "Programs";
-    const viewMoreUrl = getSectionCategoryPath(selectedCategory);
-
     if (categoryProgramIds.size === 0) {
         return {
             programs: [],
+            totalPrograms: 0,
             title,
-            viewMoreUrl,
         };
     }
 
@@ -227,16 +206,18 @@ const getCategorySectionData = async (): Promise<CategorySectionData> => {
         .filter((program): program is ProgramItem => program !== null);
 
     return {
-        programs: sectionPrograms,
+        programs: previewOnly ? sectionPrograms.slice(0, 1) : sectionPrograms,
+        totalPrograms: sectionPrograms.length,
         title,
-        viewMoreUrl,
     };
 };
 
 export default function CategorySection() {
     const [programs, setPrograms] = useState<ProgramItem[]>([]);
     const [sectionTitle, setSectionTitle] = useState("Programs");
-    const [viewMoreUrl, setViewMoreUrl] = useState("#");
+    const [totalPrograms, setTotalPrograms] = useState(0);
+    const [isLoadingAllPrograms, setIsLoadingAllPrograms] = useState(false);
+    const [hasLoadedAllPrograms, setHasLoadedAllPrograms] = useState(false);
     const [startIndex, setStartIndex] = useState(0);
     const visibleCount = useResponsiveCount({
         desktop: 3,
@@ -247,12 +228,13 @@ export default function CategorySection() {
     useEffect(() => {
         let mounted = true;
 
-        getCategorySectionData()
-            .then(({ programs: items, title, viewMoreUrl: categoryUrl }) => {
+        getCategorySectionData(true)
+            .then(({ programs: items, totalPrograms: totalItems, title }) => {
                 if (mounted) {
                     setPrograms(items);
+                    setTotalPrograms(totalItems);
                     setSectionTitle(title);
-                    setViewMoreUrl(categoryUrl);
+                    setHasLoadedAllPrograms(totalItems <= items.length);
                     setStartIndex(0);
                 }
             })
@@ -264,6 +246,28 @@ export default function CategorySection() {
             mounted = false;
         };
     }, []);
+
+    const handleViewMorePrograms = async () => {
+        if (isLoadingAllPrograms || hasLoadedAllPrograms) {
+            return;
+        }
+
+        setIsLoadingAllPrograms(true);
+
+        try {
+            const { programs: items, totalPrograms: totalItems, title } = await getCategorySectionData();
+
+            setPrograms(items);
+            setTotalPrograms(totalItems);
+            setSectionTitle(title);
+            setHasLoadedAllPrograms(true);
+            setStartIndex(0);
+        } catch (error) {
+            console.error("Error loading all category section programs", error);
+        } finally {
+            setIsLoadingAllPrograms(false);
+        }
+    };
 
     if (programs.length === 0) {
         return null;
@@ -335,9 +339,18 @@ export default function CategorySection() {
                         </button>
                     )}
                 </div>
-                <div className="category-section__actions">
-                    <a href={viewMoreUrl} className="boton-programa category-section__view-more">view more programs</a>
-                </div>
+                {!hasLoadedAllPrograms && totalPrograms > programs.length && (
+                    <div className="category-section__actions">
+                        <button
+                            type="button"
+                            className="boton-programa category-section__view-more"
+                            onClick={handleViewMorePrograms}
+                            disabled={isLoadingAllPrograms}
+                        >
+                            {isLoadingAllPrograms ? "loading programs..." : "view more programs"}
+                        </button>
+                    </div>
+                )}
             </section>
         </div>
     );

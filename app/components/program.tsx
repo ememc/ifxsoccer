@@ -203,8 +203,18 @@ export default function Program() {
                                     <h3>{program.title}</h3>
                                     <p className="programa-descripcion">{program.description}</p>
                                     <div className="botones">
-                                        <a href={program.canonicalUrl} className="boton-programa">learn more</a>
-                                        <a href={program.applyUrl} className="boton-programa-azul">Apply online</a>
+                                        <table  className="tabla-programa">
+                                            <tbody>
+                                            <tr>
+                                                <td className="celda-programa">
+                                                    <a href={program.canonicalUrl} className="boton-programa">learn more</a>
+                                                </td>
+                                                <td className="celda-programa">
+                                                    <a href={program.applyUrl} className="boton-programa-azul">Apply online</a>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>

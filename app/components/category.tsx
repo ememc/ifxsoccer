@@ -203,8 +203,18 @@ export default function Category() {
                                     <h3>{category.title}</h3>
                                     <p className="programa-descripcion">{category.description}</p>
                                     <div className="botones">
-                                        <a href={category.canonicalUrl} className="boton-programa">learn more</a>
-                                        <a href={category.applyUrl} className="boton-programa-azul">Apply online</a>
+                                        <table  className="tabla-programa">
+                                            <tbody>
+                                            <tr>                           
+                                                <td className="celda-programa">
+                                                    <a href={category.canonicalUrl} className="boton-programa">learn more</a>
+                                                </td>
+                                                <td className="celda-programa">
+                                                    <a href={category.applyUrl} className="boton-programa-azul">Apply online</a>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
