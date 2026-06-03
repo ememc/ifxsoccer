@@ -6,7 +6,7 @@ export default function Partner() {
             <h2 className="photo-gallery__title">Our Global Partners</h2>
             <br/>
             <br/>
-            <p className="contenido-programa">We collaborate with leading football academies and clubs worldwide.</p>
+            <p className="partner-description">We collaborate with leading football academies and clubs worldwide.</p>
             <div className="galeria-imagenes">
                 {partnerImages.map((imageNumber) => (
                     <img

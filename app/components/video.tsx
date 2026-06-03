@@ -176,9 +176,10 @@ export default function Video() {
         };
     }, []);
 
-    const canSlide = videoItems.length > visibleCount;
+    const canSlide = videoItems.length > 1;
+    const visibleSlots = Math.min(visibleCount, videoItems.length);
     const visibleVideos = canSlide
-        ? Array.from({ length: visibleCount }, (_, index) => videoItems[(startIndex + index) % videoItems.length])
+        ? Array.from({ length: visibleSlots }, (_, index) => videoItems[(startIndex + index) % videoItems.length])
         : videoItems.slice(0, visibleCount);
 
     const handlePrevious = () => {
@@ -214,7 +215,7 @@ export default function Video() {
                     {canSlide && (
                         <button
                             type="button"
-                            className="video-gallery__control"
+                            className="photo-gallery__control video-gallery__control video-gallery__control--prev"
                             aria-label="Previous videos"
                             onClick={handlePrevious}
                         >
@@ -246,7 +247,7 @@ export default function Video() {
                     {canSlide && (
                         <button
                             type="button"
-                            className="video-gallery__control"
+                            className="photo-gallery__control video-gallery__control video-gallery__control--next"
                             aria-label="Next videos"
                             onClick={handleNext}
                         >

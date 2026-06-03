@@ -34,12 +34,12 @@ const slugifyAnchor = (value: string) =>
     .replace(/^-+|-+$/g, "");
 
 const getOrderedSections = (program: Program) =>
-  [...(program.program_section ?? [])]
+  toArray(program.program_section)
     .filter((section) => section.section_title || section.section_text || section.section_image)
     .sort((first, second) => Number(first.section_order ?? 0) - Number(second.section_order ?? 0));
 
-const toArray = <T,>(value: T[] | T | undefined): T[] => {
-  if (!value) {
+const toArray = <T,>(value: T[] | T | false | null | undefined): T[] => {
+  if (!value || typeof value !== "object") {
     return [];
   }
 

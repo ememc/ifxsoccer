@@ -127,6 +127,7 @@ const getPrograms = async (): Promise<ProgramItem[]> => {
 export default function Program() {
     const [programs, setPrograms] = useState<ProgramItem[]>([]);
     const [startIndex, setStartIndex] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
     const visibleCount = useResponsiveCount({
         desktop: 3,
         tablet: 2,
@@ -141,10 +142,14 @@ export default function Program() {
                 if (mounted) {
                     setPrograms(items);
                     setStartIndex(0);
+                    setIsLoading(false);
                 }
             })
             .catch((error) => {
                 console.error("Error loading programs", error);
+                if (mounted) {
+                    setIsLoading(false);
+                }
             });
 
         return () => {
@@ -153,6 +158,19 @@ export default function Program() {
     }, []);
 
     if (programs.length === 0) {
+        if (isLoading) {
+            return (
+                <section className="seccion contenedor page-loading page-loading--programs" aria-label="Loading programs">
+                    <div className="page-loading__title"></div>
+                    <div className="page-loading__cards">
+                        <div className="page-loading__card"></div>
+                        <div className="page-loading__card"></div>
+                        <div className="page-loading__card"></div>
+                    </div>
+                </section>
+            );
+        }
+
         return null;
     }
 
@@ -203,18 +221,8 @@ export default function Program() {
                                     <h3>{program.title}</h3>
                                     <p className="programa-descripcion">{program.description}</p>
                                     <div className="botones">
-                                        <table  className="tabla-programa">
-                                            <tbody>
-                                            <tr>
-                                                <td className="celda-programa">
-                                                    <a href={program.canonicalUrl} className="boton-programa">learn more</a>
-                                                </td>
-                                                <td className="celda-programa">
-                                                    <a href={program.applyUrl} className="boton-programa-azul">Apply online</a>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
+                                        <a href={program.canonicalUrl} className="boton-programa">learn more</a>
+                                        <a href={program.applyUrl} className="boton-programa-azul">Apply online</a>
                                     </div>
                                 </div>
                             </div>

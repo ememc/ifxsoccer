@@ -133,6 +133,7 @@ const getCategories = async (): Promise<CategoryItem[]> => {
 export default function Category() {
     const [categories, setCategories] = useState<CategoryItem[]>([]);
     const [startIndex, setStartIndex] = useState(0);
+    const [isLoading, setIsLoading] = useState(true);
     const visibleCount = useResponsiveCount({
         desktop: 3,
         tablet: 2,
@@ -147,10 +148,14 @@ export default function Category() {
                 if (mounted) {
                     setCategories(items);
                     setStartIndex(0);
+                    setIsLoading(false);
                 }
             })
             .catch((error) => {
                 console.error("Error loading categories", error);
+                if (mounted) {
+                    setIsLoading(false);
+                }
             });
 
         return () => {
@@ -159,6 +164,19 @@ export default function Category() {
     }, []);
 
     if (categories.length === 0) {
+        if (isLoading) {
+            return (
+                <section className="seccion contenedor page-loading page-loading--programs" aria-label="Loading categories">
+                    <div className="page-loading__title"></div>
+                    <div className="page-loading__cards">
+                        <div className="page-loading__card"></div>
+                        <div className="page-loading__card"></div>
+                        <div className="page-loading__card"></div>
+                    </div>
+                </section>
+            );
+        }
+
         return null;
     }
 
@@ -203,18 +221,8 @@ export default function Category() {
                                     <h3>{category.title}</h3>
                                     <p className="programa-descripcion">{category.description}</p>
                                     <div className="botones">
-                                        <table  className="tabla-programa">
-                                            <tbody>
-                                            <tr>                           
-                                                <td className="celda-programa">
-                                                    <a href={category.canonicalUrl} className="boton-programa">learn more</a>
-                                                </td>
-                                                <td className="celda-programa">
-                                                    <a href={category.applyUrl} className="boton-programa-azul">Apply online</a>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
+                                        <a href={category.canonicalUrl} className="boton-programa">learn more</a>
+                                        <a href={category.applyUrl} className="boton-programa-azul">Apply online</a>
                                     </div>
                                 </div>
                             </div>

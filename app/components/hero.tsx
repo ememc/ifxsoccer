@@ -70,6 +70,7 @@ export const getHeroData = async (): Promise<HeroData[]> => {
 export default function Hero() {
 
     const [heroData, setHeroData] = useState<HeroData[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         let mounted = true;
@@ -78,10 +79,14 @@ export default function Hero() {
             .then((data) => {
                 if (mounted) {
                     setHeroData(data);
+                    setIsLoading(false);
                 }
             })
             .catch((error) => {
                 console.error("Error loading hero data", error);
+                if (mounted) {
+                    setIsLoading(false);
+                }
             });
         void import('bootstrap/dist/js/bootstrap.bundle.min.js');
 
@@ -91,6 +96,14 @@ export default function Hero() {
     }, []);
 
     if (heroData.length === 0) {
+        if (isLoading) {
+            return (
+                <section className="page-loading page-loading--hero" aria-label="Loading hero">
+                    <div className="page-loading__shine"></div>
+                </section>
+            );
+        }
+
         return null;
     }
 

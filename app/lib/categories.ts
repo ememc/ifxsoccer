@@ -19,7 +19,7 @@ export type Category = {
   category_apply?: string;
   category_enabled?: boolean;
   category_hero?: ProgramHero[];
-  category_section?: ProgramSection[];
+  category_section?: ProgramSection[] | boolean;
   category_details?: ProgramDetail[] | ProgramDetail;
   category_information?: ProgramInformation[] | ProgramInformation;
   category_variations?: ProgramVariation[] | ProgramVariation;
@@ -154,7 +154,7 @@ export const categoryToProgram = (category: Category): Program => ({
   program_apply: category.category_apply,
   program_enabled: category.category_enabled,
   program_hero: category.category_hero,
-  program_section: category.category_section,
+  program_section: Array.isArray(category.category_section) ? category.category_section : [],
   program_details: category.category_details,
   program_information: category.category_information,
   program_variations: category.category_variations,

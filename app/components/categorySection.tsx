@@ -17,13 +17,18 @@ type ProgramItem = {
     imageUrl: string;
 };
 
-type CategorySectionData = {
+type CategoryProgramSection = {
+    id: string;
     programs: ProgramItem[];
-    totalPrograms: number;
     title: string;
 };
 
+type CategorySectionData = {
+    sections: CategoryProgramSection[];
+};
+
 const FALLBACK_PROGRAM_IMAGE = "https://s3.us-west-1.amazonaws.com/static.ifxsoccer.com/sliderPROYEARGERMANY.jpg";
+const CATEGORIES_INCREMENT = 1;
 
 const isRecord = (value: unknown): value is ApiRecord => (
     typeof value === "object" && value !== null && !Array.isArray(value)
@@ -50,6 +55,10 @@ const hasProgramIds = (value: unknown) => {
     addProgramIdsFromValue(value, programIds);
     return programIds.size > 0;
 };
+
+const hasSectionValue = (value: unknown) => (
+    isTrueValue(value) || (Array.isArray(value) && value.length > 0)
+);
 
 const getProgramHeroImage = (item: ApiRecord) => {
     const heroCollection = item.program_hero;
@@ -157,26 +166,86 @@ const addProgramIdsFromValue = (value: unknown, programIds: Map<string, number>,
 
 const getSectionCategories = (categories: ApiRecord[]) => {
     const enabledCategories = categories.filter((category) => isTrueValue(category.category_enabled));
-    const sectionCategories = enabledCategories.filter((category) => isTrueValue(category.category_section));
+    const sectionCategories = enabledCategories.filter((category) => hasSectionValue(category.category_section));
+    const programCategories = enabledCategories.filter((category) => hasProgramIds(category.category_programs));
+    const categoryMap = new Map<string, ApiRecord>();
 
-    if (sectionCategories.length > 0) {
-        return sectionCategories;
-    }
+    [...sectionCategories, ...programCategories].forEach((category, index) => {
+        const categoryKey = getStringValue(category, ["category_id", "id", "_id"]) || `${getStringValue(category, ["category_title", "title", "name"])}-${index}`;
+        categoryMap.set(categoryKey, category);
+    });
 
-    return enabledCategories.filter((category) => hasProgramIds(category.category_programs));
+    return Array.from(categoryMap.values());
 };
 
-const getSectionCategoryProgramIds = (categories: ApiRecord[]) => {
+const getCategoryProgramIds = (category: ApiRecord) => {
     const programIds = new Map<string, number>();
 
-    categories.forEach((category) => {
-        addProgramIdsFromValue(category.category_programs, programIds);
-    });
+    addProgramIdsFromValue(category.category_programs, programIds);
 
     return programIds;
 };
 
-const getCategorySectionData = async (previewOnly = false): Promise<CategorySectionData> => {
+const normalizeComparisonText = (value: string) => value.trim().toLowerCase().replace(/\s+/g, " ");
+
+const isEnabledProgram = (program: ApiRecord) => (
+    program.program_enabled !== false && program.enabled !== false
+);
+
+const getProgramRecordId = (program: ApiRecord) => getStringValue(program, ["program_id", "id", "_id"]);
+
+const getCategoryPrograms = (category: ApiRecord, programs: ApiRecord[]) => {
+    const categoryProgramIds = getCategoryProgramIds(category);
+    const categoryId = getStringValue(category, ["category_id", "id", "_id"]);
+    const categoryLabels = [
+        getStringValue(category, ["category_category"]),
+        getStringValue(category, ["category_title", "title", "name"]),
+    ]
+        .filter(Boolean)
+        .map(normalizeComparisonText);
+    const enabledPrograms = programs.filter(isEnabledProgram);
+    const matchedById = categoryId
+        ? enabledPrograms.filter((program) => getProgramRecordId(program) === categoryId)
+        : [];
+
+    const basePrograms = categoryProgramIds.size > 0
+        ? enabledPrograms
+        : matchedById.length > 0
+            ? matchedById
+            : enabledPrograms;
+    const selectedPrograms = basePrograms
+        .filter((program) => {
+            const programId = getProgramRecordId(program);
+
+            if (categoryProgramIds.size > 0) {
+                return categoryProgramIds.has(programId);
+            }
+
+            if (matchedById.length > 0) {
+                return true;
+            }
+
+            const programCategory = normalizeComparisonText(getStringValue(program, ["program_category", "category"]));
+
+            return categoryLabels.includes(programCategory);
+        })
+        .sort((firstProgram, secondProgram) => {
+            if (categoryProgramIds.size === 0) {
+                return 0;
+            }
+
+            return (
+                (categoryProgramIds.get(getProgramRecordId(firstProgram)) ?? 0) -
+                (categoryProgramIds.get(getProgramRecordId(secondProgram)) ?? 0)
+            );
+        })
+        .map(normalizeProgramItem)
+        .filter((program): program is ProgramItem => program !== null);
+
+    return Array.from(new Map(selectedPrograms.map((program) => [program.id, program])).values());
+};
+
+const getCategorySectionData = async (): Promise<CategorySectionData> => {
     const [categoriesResponse, programsResponse] = await Promise.all([
         api.get<unknown>(API_ENDPOINTS.category),
         api.get<unknown>(API_ENDPOINTS.programs),
@@ -184,42 +253,24 @@ const getCategorySectionData = async (previewOnly = false): Promise<CategorySect
     const categories = parseCollectionResponse(categoriesResponse.data, ["category", "categories", "items", "data", "results"]);
     const programs = parseCollectionResponse(programsResponse.data, ["programs", "program", "items", "data", "results"]);
     const sectionCategories = getSectionCategories(categories);
-    const categoryProgramIds = getSectionCategoryProgramIds(sectionCategories);
-    const selectedCategory = sectionCategories[0];
-    const title = getStringValue(selectedCategory ?? {}, ["category_title", "title", "name"]) || "Programs";
-    if (categoryProgramIds.size === 0) {
-        return {
-            programs: [],
-            totalPrograms: 0,
-            title,
-        };
-    }
-
-    const sectionPrograms = programs
-        .filter((program) => program.program_enabled !== false && program.enabled !== false)
-        .filter((program) => categoryProgramIds.has(getStringValue(program, ["program_id", "id", "_id"])))
-        .sort((firstProgram, secondProgram) => (
-            (categoryProgramIds.get(getStringValue(firstProgram, ["program_id", "id", "_id"])) ?? 0) -
-            (categoryProgramIds.get(getStringValue(secondProgram, ["program_id", "id", "_id"])) ?? 0)
-        ))
-        .map(normalizeProgramItem)
-        .filter((program): program is ProgramItem => program !== null);
 
     return {
-        programs: previewOnly ? sectionPrograms.slice(0, 1) : sectionPrograms,
-        totalPrograms: sectionPrograms.length,
-        title,
+        sections: sectionCategories
+            .map((category, index) => ({
+                id: getStringValue(category, ["category_id", "id", "_id"]) || `${getStringValue(category, ["category_title", "title", "name"])}-${index}`,
+                programs: getCategoryPrograms(category, programs),
+                title: getStringValue(category, ["category_title", "title", "name"]) || "Programs",
+            }))
+            .filter((section) => section.programs.length > 0),
     };
 };
 
 export default function CategorySection() {
-    const [programs, setPrograms] = useState<ProgramItem[]>([]);
-    const [sectionTitle, setSectionTitle] = useState("Programs");
-    const [totalPrograms, setTotalPrograms] = useState(0);
-    const [isLoadingAllPrograms, setIsLoadingAllPrograms] = useState(false);
-    const [hasLoadedAllPrograms, setHasLoadedAllPrograms] = useState(false);
-    const [startIndex, setStartIndex] = useState(0);
-    const visibleCount = useResponsiveCount({
+    const [sections, setSections] = useState<CategoryProgramSection[]>([]);
+    const [visibleSectionCount, setVisibleSectionCount] = useState(1);
+    const [isLoadingMoreCategories, setIsLoadingMoreCategories] = useState(false);
+    const [startIndexes, setStartIndexes] = useState<Record<string, number>>({});
+    const visibleProgramCount = useResponsiveCount({
         desktop: 3,
         tablet: 2,
         mobile: 1,
@@ -228,14 +279,12 @@ export default function CategorySection() {
     useEffect(() => {
         let mounted = true;
 
-        getCategorySectionData(true)
-            .then(({ programs: items, totalPrograms: totalItems, title }) => {
+        getCategorySectionData()
+            .then(({ sections: items }) => {
                 if (mounted) {
-                    setPrograms(items);
-                    setTotalPrograms(totalItems);
-                    setSectionTitle(title);
-                    setHasLoadedAllPrograms(totalItems <= items.length);
-                    setStartIndex(0);
+                    setSections(items);
+                    setVisibleSectionCount(1);
+                    setStartIndexes({});
                 }
             })
             .catch((error) => {
@@ -247,110 +296,121 @@ export default function CategorySection() {
         };
     }, []);
 
-    const handleViewMorePrograms = async () => {
-        if (isLoadingAllPrograms || hasLoadedAllPrograms) {
+    const visibleSections = sections.slice(0, visibleSectionCount);
+    const hasMoreCategories = visibleSectionCount < sections.length;
+
+    const handleViewMorePrograms = () => {
+        if (isLoadingMoreCategories || !hasMoreCategories) {
             return;
         }
 
-        setIsLoadingAllPrograms(true);
-
-        try {
-            const { programs: items, totalPrograms: totalItems, title } = await getCategorySectionData();
-
-            setPrograms(items);
-            setTotalPrograms(totalItems);
-            setSectionTitle(title);
-            setHasLoadedAllPrograms(true);
-            setStartIndex(0);
-        } catch (error) {
-            console.error("Error loading all category section programs", error);
-        } finally {
-            setIsLoadingAllPrograms(false);
-        }
+        setIsLoadingMoreCategories(true);
+        setVisibleSectionCount((currentCount) => Math.min(currentCount + CATEGORIES_INCREMENT, sections.length));
+        setIsLoadingMoreCategories(false);
     };
 
-    if (programs.length === 0) {
+    if (sections.length === 0) {
         return null;
     }
 
-    const canSlide = programs.length > 1;
-    const visibleSlots = Math.min(visibleCount, programs.length);
-    const visiblePrograms = canSlide
-        ? Array.from(
-            { length: visibleSlots },
-            (_, index) => programs[(startIndex + index) % programs.length]
-        )
-        : programs;
+    const getVisiblePrograms = (section: CategoryProgramSection) => {
+        const startIndex = startIndexes[section.id] ?? 0;
+        const visibleSlots = Math.min(visibleProgramCount, section.programs.length);
 
-    const handlePrevious = () => {
-        setStartIndex((currentIndex) => (
-            currentIndex === 0 ? programs.length - 1 : currentIndex - 1
-        ));
+        if (section.programs.length <= 1) {
+            return section.programs;
+        }
+
+        return Array.from(
+            { length: visibleSlots },
+            (_, index) => section.programs[(startIndex + index) % section.programs.length]
+        );
     };
 
-    const handleNext = () => {
-        setStartIndex((currentIndex) => (currentIndex + 1) % programs.length);
+    const handlePrevious = (section: CategoryProgramSection) => {
+        setStartIndexes((currentIndexes) => {
+            const currentIndex = currentIndexes[section.id] ?? 0;
+
+            return {
+                ...currentIndexes,
+                [section.id]: currentIndex === 0 ? section.programs.length - 1 : currentIndex - 1,
+            };
+        });
+    };
+
+    const handleNext = (section: CategoryProgramSection) => {
+        setStartIndexes((currentIndexes) => ({
+            ...currentIndexes,
+            [section.id]: ((currentIndexes[section.id] ?? 0) + 1) % section.programs.length,
+        }));
     };
 
     return (
         <div>
-            <section className="seccion contenedor">
-                <h2 className="photo-gallery__title">
-                    {sectionTitle}
-                </h2>
-                <div className={`programs-carousel ${canSlide ? "" : "programs-carousel--static"} ${visiblePrograms.length === 1 ? "programs-carousel--single" : ""}`.trim()}>
-                    {canSlide && (
-                        <button
-                            type="button"
-                            className="photo-gallery__control programs-carousel__control"
-                            aria-label="Previous category section programs"
-                            onClick={handlePrevious}
-                        >
-                            <i className="fa-solid fa-chevron-left"></i>
-                        </button>
-                    )}
-                    <div className="contenedor-programas">
-                        {visiblePrograms.map((program, index) => (
-                            <div className="programa" key={program.id}>
-                                <picture>
-                                    <source srcSet={program.imageUrl} type="image/webp"></source>
-                                    <source srcSet={program.imageUrl} type="image/jpeg"></source>
-                                    <img loading="lazy" src={program.imageUrl} alt={program.title}></img>
-                                </picture>
-                                <div className={`contenido-programa ${index === 0 ? "especial" : ""}`.trim()}>
-                                    <h3>{program.title}</h3>
-                                    <p className="programa-descripcion">{program.description}</p>
-                                    <div className="botones">
-                                        <a href={program.canonicalUrl} className="boton-programa">learn more</a>
-                                        <a href={program.applyUrl} className="boton-programa-azul">Apply online</a>
-                                    </div>
+            <section className="seccion contenedor category-section">
+                {visibleSections.map((section) => {
+                    const canSlide = section.programs.length > 1;
+                    const visiblePrograms = getVisiblePrograms(section);
+
+                    return (
+                        <div className="category-section__group" key={section.id}>
+                            <h2 className="photo-gallery__title">
+                                {section.title}
+                            </h2>
+                            <div className={`programs-carousel ${canSlide ? "" : "programs-carousel--static"} ${visiblePrograms.length === 1 ? "programs-carousel--single" : ""}`.trim()}>
+                                {canSlide && (
+                                    <button
+                                        type="button"
+                                        className="photo-gallery__control programs-carousel__control"
+                                        aria-label={`Previous ${section.title} programs`}
+                                        onClick={() => handlePrevious(section)}
+                                    >
+                                        <i className="fa-solid fa-chevron-left"></i>
+                                    </button>
+                                )}
+                                <div className="contenedor-programas">
+                                    {visiblePrograms.map((program, index) => (
+                                        <div className="programa" key={program.id}>
+                                            <picture>
+                                                <source srcSet={program.imageUrl} type="image/webp"></source>
+                                                <source srcSet={program.imageUrl} type="image/jpeg"></source>
+                                                <img loading="lazy" src={program.imageUrl} alt={program.title}></img>
+                                            </picture>
+                                            <div className={`contenido-programa ${index === 0 ? "especial" : ""}`.trim()}>
+                                                <h3>{program.title}</h3>
+                                                <p className="programa-descripcion">{program.description}</p>
+                                                <div className="botones">
+                                                    <a href={program.canonicalUrl} className="boton-programa">learn more</a>
+                                                    <a href={program.applyUrl} className="boton-programa-azul">Apply online</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
+                                {canSlide && (
+                                    <button
+                                        type="button"
+                                        className="photo-gallery__control programs-carousel__control"
+                                        aria-label={`Next ${section.title} programs`}
+                                        onClick={() => handleNext(section)}
+                                    >
+                                        <i className="fa-solid fa-chevron-right"></i>
+                                    </button>
+                                )}
                             </div>
-                        ))}
-                    </div>
-                    {canSlide && (
-                        <button
-                            type="button"
-                            className="photo-gallery__control programs-carousel__control"
-                            aria-label="Next category section programs"
-                            onClick={handleNext}
-                        >
-                            <i className="fa-solid fa-chevron-right"></i>
-                        </button>
-                    )}
+                        </div>
+                    );
+                })}
+                <div className="category-section__actions">
+                    <button
+                        type="button"
+                        className="boton-programa category-section__view-more"
+                        onClick={handleViewMorePrograms}
+                        disabled={isLoadingMoreCategories || !hasMoreCategories}
+                    >
+                        {hasMoreCategories ? "view more programs" : "no more programs"}
+                    </button>
                 </div>
-                {!hasLoadedAllPrograms && totalPrograms > programs.length && (
-                    <div className="category-section__actions">
-                        <button
-                            type="button"
-                            className="boton-programa category-section__view-more"
-                            onClick={handleViewMorePrograms}
-                            disabled={isLoadingAllPrograms}
-                        >
-                            {isLoadingAllPrograms ? "loading programs..." : "view more programs"}
-                        </button>
-                    </div>
-                )}
             </section>
         </div>
     );

@@ -250,6 +250,87 @@ h4 {
   margin-top: 5rem;
 }
 
+.page-loading {
+  overflow: hidden;
+  position: relative;
+}
+
+.page-loading::after,
+.page-loading__shine,
+.page-loading__title,
+.page-loading__card {
+  animation: loading-pulse 1.4s ease-in-out infinite;
+  background: linear-gradient(90deg, #f1f1f1 0%, #e3e3e3 50%, #f1f1f1 100%);
+  background-size: 200% 100%;
+}
+
+.page-loading--hero {
+  min-height: 48rem;
+}
+
+.page-loading__shine {
+  height: 100%;
+  min-height: 48rem;
+  width: 100%;
+}
+
+.page-loading__title {
+  border-radius: .5rem;
+  height: 5.2rem;
+  margin-bottom: 4rem;
+  max-width: 56rem;
+}
+
+.page-loading__cards {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.page-loading__card {
+  border-radius: .5rem;
+  min-height: 48rem;
+}
+
+@keyframes loading-pulse {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (max-width: 1023px) {
+  .page-loading__cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .page-loading__cards .page-loading__card:nth-child(3) {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-loading--hero,
+  .page-loading__shine {
+    min-height: 36rem;
+  }
+
+  .page-loading__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .page-loading__cards .page-loading__card:nth-child(2) {
+    display: none;
+  }
+
+  .page-loading__card {
+    min-height: 46rem;
+  }
+}
+
 .contenido-centrado {
   max-width: 800px;
 }
@@ -3394,17 +3475,27 @@ h2 {
   margin: 0;
 }
 .contenido-programa h3 {
+  display: -webkit-box;
   text-transform: uppercase;
   font-size: 2.1rem;
   line-height: 1.25;
   text-align: left;
   color: #2f3878;
   margin-top: 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.35rem;
   height: auto;
-  min-height: calc(2.1rem * 1.25 * 3);
+  min-height: calc(2.1rem * 1.25 * 2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 .contenido-programa p {
+  color: #808080;
+  font-weight: 200;
+}
+
+.partner-description {
   color: #808080;
   font-weight: 200;
 }
@@ -3451,7 +3542,7 @@ h2 {
   text-decoration: none;
   padding: 1rem 3rem;
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 1rem;
   display: inline-block;
   border-radius: 0.5rem;
   font-size: 1.4rem;
@@ -3582,8 +3673,17 @@ h2 {
   margin-top: 2.4rem;
 }
 
+.category-section__group + .category-section__group {
+  margin-top: 5rem;
+}
+
 .category-section__view-more {
   font-size: 1.8rem;
+}
+
+.category-section__view-more:disabled {
+  cursor: default;
+  opacity: .6;
 }
 
 @media (min-width: 768px) {
